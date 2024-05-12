@@ -26,7 +26,7 @@ def header(self):
     self.setStyleSheet("background-color: black; color: white;")
 
     QFontDatabase.addApplicationFont("fonts/Abril_Fatface/AbrilFatface-Regular.ttf")
-    QFontDatabase.addApplicationFont("fonts/Lato/Lato-Black.ttf")
+    QFontDatabase.addApplicationFont("fonts/Lato/Lato-Light.ttf")
 
 # Área do cabeçalho
     header_widget = QWidget()

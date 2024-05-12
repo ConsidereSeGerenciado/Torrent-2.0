@@ -36,8 +36,9 @@ def menu(self):
 
     menu_layout.addSpacing(10)
     # Botões do menu
-    button_home = ClickableImageLabel(QPixmap("Imagens/casa.png"), 50, 50)
+    button_home = ClickableImageLabel(QPixmap("Imagens/casa.png"), 512, 512)
     button_home.clicked.connect(self.home_clicked)
+    button_home.setFixedSize(50, 50)
     button_home.setStyleSheet("border: none;  padding: 0px;")
 
     button_home.setContentsMargins(5, 5, 5, 5)
@@ -50,8 +51,9 @@ def menu(self):
 
     menu_layout.addSpacing(15)
 
-    button_tipo = ClickableImageLabel(QPixmap("Imagens/tipos.png"), 50, 50)
+    button_tipo = ClickableImageLabel(QPixmap("Imagens/tipos.png"), 512, 512)
     button_tipo.clicked.connect(self.tipo_clicked)
+    button_tipo.setFixedSize(50, 50)
     button_tipo.setStyleSheet("border: none; padding: 0px;")
 
     button_tipo.setContentsMargins(5, 5, 5, 5)
@@ -64,8 +66,9 @@ def menu(self):
 
     menu_layout.addSpacing(15)
 
-    button_biblioteca = ClickableImageLabel(QPixmap("Imagens/biblioteca.png"), 50, 50)
+    button_biblioteca = ClickableImageLabel(QPixmap("Imagens/biblioteca.png"), 512, 512)
     button_biblioteca.setStyleSheet("border: none; padding: 0px;")
+    button_biblioteca.setFixedSize(50, 50)
     button_biblioteca.clicked.connect(self.biblioteca_clicked)
 
     button_biblioteca.setContentsMargins(5, 5, 5, 5)
@@ -79,8 +82,9 @@ def menu(self):
     menu2_layout = QHBoxLayout() 
     menu2_layout.setAlignment(Qt.AlignBottom)  # Define o alinhamento vertical para a parte inferior
 
-    button_github = ClickableImageLabel(QPixmap("Imagens/github.png"),40,40)
+    button_github = ClickableImageLabel(QPixmap("Imagens/github.png"),512,512)
     button_github.setStyleSheet("border:none; padding: 0px;")
+    button_github.setFixedSize(40, 40)
     button_github.clicked.connect(self.github_clicked)
 
     button_github.setContentsMargins(10, 10, 10, 10)
@@ -91,8 +95,9 @@ def menu(self):
 
     menu2_layout.addWidget(button_github, alignment=Qt.AlignCenter)
 
-    button_config = ClickableImageLabel(QPixmap("Imagens/config.png"),40,40)
+    button_config = ClickableImageLabel(QPixmap("Imagens/config.png"),512,512)
     button_config.setStyleSheet("border:none; padding: 0px;")
+    button_config.setFixedSize(40, 40)
     button_config.clicked.connect(self.config_clicked)
 
     button_config.setContentsMargins(10, 10, 10, 10)

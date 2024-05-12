@@ -34,11 +34,11 @@ def initUI2(self):
     pesquisa_layout = QHBoxLayout(pesquisa_widget)
     pesquisa_layout.setAlignment(Qt.AlignCenter)
 
-    label_seta = ClickableImageLabel(QPixmap("Imagens/voltar.png"),40,30)
+    label_seta = ClickableImageLabel(QPixmap("Imagens/voltar.png"),512,512)
     label_seta.setStyleSheet("border:none; padding: 0px;")
     label_seta.clicked.connect(self.home_clicked)
     label_seta.setStyleSheet("border-bottom: none; padding: 0px;")
-    label_seta.setFixedSize(80,30)
+    label_seta.setFixedSize(50,30)
     pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
 
 
@@ -61,6 +61,7 @@ def initUI2(self):
     content_pri_layout = QVBoxLayout()
 
     content_widget = QLabel("Conteúdo Principal\n" * 50)
+    content_widget.setFont(QFont("Lato", 11))
     content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     scroll_area = QScrollArea()
     scroll_area.setWidget(content_widget)
