@@ -36,7 +36,7 @@ def initUI3(self):
     label_seta.setStyleSheet("border:none; padding: 0px;")
     label_seta.clicked.connect(self.home_clicked)
     label_seta.setStyleSheet("border-bottom: none; padding: 0px;")
-    label_seta.setFixedSize(50,30)
+    label_seta.setFixedSize(80,30)
     pesquisa_layout.addWidget(label_seta)
 
     label_inicio = QLabel("<font face='Abril Fatface' size='8'><b>Configuração</b></font>")
