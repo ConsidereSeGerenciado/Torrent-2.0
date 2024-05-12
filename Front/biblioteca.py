@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea
+    QScrollArea, QGridLayout, QFrame
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -59,17 +59,44 @@ def initUI2(self):
 
     # Conteúdo principal
     content_pri_layout = QVBoxLayout()
-
-    content_widget = QLabel("Conteúdo Principal\n" * 50)
-    content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     scroll_area = QScrollArea()
+    scroll_area.setWidgetResizable(True)
+
+    content_widget = QWidget()
+    content_layout1 = QVBoxLayout(content_widget)
+     # Espaçamento entre as linhas
+
+    items = [f"Item {i+1}" for i in range(20)]  # Exemplo de 20 itens
+    for item in items:
+
+        button = ClickableImageLabel(QPixmap("Imagens/config.png"), 100, 70)
+        button.setStyleSheet("border: none; padding: 0px;")
+
+        # Criar um QLabel para ser adicionado ao ClickableImageLabel
+        label = QLabel("Nome")
+        label.setStyleSheet("border: none; padding: 0px;")
+
+        # Criar um QLabel para ser adicionado ao ClickableImageLabel
+        label1 = QPushButton("Abrir")
+        button.setFixedSize(100, 50)
+        label1.setStyleSheet("border: 2px solid white; padding: 0px;")
+
+        # Criar um frame para conter os elementos
+        frame = QFrame()
+        frame.setFrameStyle(QFrame.Box | QFrame.Plain)  # Estilo de borda
+        frame.setLineWidth(2)  # Largura da borda
+        frame_layout = QHBoxLayout(frame)
+
+        # Adicionar os elementos ao layout do frame
+        frame_layout.addWidget(button)
+        frame_layout.addWidget(label)
+        frame_layout.addWidget(label1)
+
+        content_layout1.addWidget(frame)
+        content_layout1.addSpacing(10)
+
     scroll_area.setWidget(content_widget)
-    scroll_area.setWidgetResizable(True)  # Permitir que o widget se expanda com a área de rolagem
-
-# Adicionar a área de rolagem ao layout do conteúdo principal
     content_pri_layout.addWidget(scroll_area)
-
-    # Adicionando o layout de conteúdo ao layout principal
     content_pesquisa_layout.addLayout(content_pri_layout)
 
     

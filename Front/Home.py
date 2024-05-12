@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea
+    QScrollArea, QGridLayout
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -48,19 +48,65 @@ def initUI(self):
     content_pesquisa_layout.addWidget(pesquisa_widget)
 
     # Conteúdo principal
+    # Layout principal
     content_pri_layout = QVBoxLayout()
 
-    content_widget = QLabel("Conteúdo Principal\n" * 50)
-    content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    # Criar a área de rolagem
     scroll_area = QScrollArea()
+    scroll_area.setWidgetResizable(True)
+
+    content_widget = QWidget()
+    content_layout = QVBoxLayout(content_widget)
+
+    destaques_widget = QLabel("Destaque")
+    destaques_widget.setStyleSheet("border: none; padding: 0px;")
+    content_layout.addWidget(destaques_widget)
+
+    destaque_widget = ClickableImageLabel(QPixmap("Imagens/config.png"), 500, 120)
+    destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
+    content_layout.addWidget(destaque_widget, alignment=Qt.AlignCenter)
+    content_layout.addSpacing(10)
+
+    populares_widget = QLabel("Populares")
+    populares_widget.setStyleSheet("border: none; padding: 0px;")
+    content_layout.addWidget(populares_widget)
+
+    # Widget para conter os itens
+    content_layout1 = QGridLayout()
+
+    content_layout1.setHorizontalSpacing(50)  # Espaçamento horizontal entre as imagens
+    content_layout1.setVerticalSpacing(20)    # Espaçamento vertical entre as linhas
+
+    # Adicionar itens de exemplo
+    items = [f"Item {i+1}" for i in range(20)]  # Exemplo de 20 itens
+    row = 0
+    col = 0
+    for item in items:
+        button = ClickableImageLabel(QPixmap("Imagens/config.png"), 270, 90)
+        button.setStyleSheet("border:2px solid white; padding: 0px;")
+        content_layout1.addWidget(button, row, col)
+
+        # Criar um QLabel para ser adicionado ao ClickableImageLabel
+        label = QLabel("Tipo")
+        label.setAlignment(Qt.AlignBottom)  # Ajustar o alinhamento do texto
+        label.setStyleSheet("border: none; padding: 0px; background-color: transparent")
+        button.setLayout(QVBoxLayout())  # Definir um layout para o ClickableImageLabel
+        button.layout().addWidget(label)  # Adicionar o QLabel ao layout do ClickableImageLabel
+
+        col += 1
+        if col == 2:
+            col = 0
+            row += 1
+
+    # Definir o layout interno de content_widget como content_layout
+    content_layout.addLayout(content_layout1)
+    
+    # Adicionar content_widget ao scroll_area
     scroll_area.setWidget(content_widget)
-    scroll_area.setWidgetResizable(True)  # Permitir que o widget se expanda com a área de rolagem
 
-# Adicionar a área de rolagem ao layout do conteúdo principal
+    # Adicionar scroll_area ao content_pri_layout
     content_pri_layout.addWidget(scroll_area)
-
     # Adicionando o layout de conteúdo ao layout principal
     content_pesquisa_layout.addLayout(content_pri_layout)
 
-    
     return content_pesquisa_layout
