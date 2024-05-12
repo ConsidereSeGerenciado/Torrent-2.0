@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea
+    QScrollArea, QGridLayout
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -58,16 +58,40 @@ def initUI1(self):
     # Conteúdo principal
     content_pri_layout = QVBoxLayout()
 
-    content_widget = QLabel("Conteúdo Principal\n" * 50)
-    content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     scroll_area = QScrollArea()
-    scroll_area.setWidget(content_widget)
-    scroll_area.setWidgetResizable(True)  # Permitir que o widget se expanda com a área de rolagem
+    scroll_area.setWidgetResizable(True)
 
-# Adicionar a área de rolagem ao layout do conteúdo principal
+    content_widget = QWidget()
+    content_layout1 = QGridLayout(content_widget)
+
+    content_layout1.setHorizontalSpacing(50)  # Espaçamento horizontal entre as imagens
+    content_layout1.setVerticalSpacing(20)    # Espaçamento vertical entre as linhas
+
+    # Adicionar itens de exemplo
+    items = [f"Item {i+1}" for i in range(20)]  # Exemplo de 20 itens
+    row = 0
+    col = 0
+    for item in items:
+        button = ClickableImageLabel(QPixmap("Imagens/config.png"), 270, 90)
+        button.setStyleSheet("border:2px solid white; padding: 0px;")
+        content_layout1.addWidget(button, row, col)
+
+        # Criar um QLabel para ser adicionado ao ClickableImageLabel
+        label = QLabel("Tipo")
+        label.setAlignment(Qt.AlignCenter)  # Ajustar o alinhamento do texto
+        label.setStyleSheet("border: none; padding: 0px; background-color: transparent")
+        button.setLayout(QVBoxLayout())  # Definir um layout para o ClickableImageLabel
+        button.layout().addWidget(label, alignment=Qt.AlignCenter)  # Adicionar o QLabel ao layout do ClickableImageLabel
+
+        col += 1
+        if col == 2:
+            col = 0
+            row += 1
+
+    
+    scroll_area.setWidget(content_widget)
     content_pri_layout.addWidget(scroll_area)
 
-    # Adicionando o layout de conteúdo ao layout principal
     content_pesquisa_layout.addLayout(content_pri_layout)
 
     

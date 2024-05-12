@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea
+    QScrollArea, QFrame
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -37,28 +37,58 @@ def initUI3(self):
     label_seta.clicked.connect(self.home_clicked)
     label_seta.setStyleSheet("border-bottom: none; padding: 0px;")
     label_seta.setFixedSize(80,30)
-    pesquisa_layout.addWidget(label_seta)
+    pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
 
     label_inicio = QLabel("<font face='Abril Fatface' size='8'><b>Configuração</b></font>")
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
     pesquisa_layout.addWidget(label_inicio)
+
+    pesquisa_layout.addStretch()
+
+    line_edit_busca = QLineEdit()
+    line_edit_busca.setStyleSheet("color: white; padding: 5px;")
+    line_edit_busca.setPlaceholderText("Buscar")
+    line_edit_busca.setFixedWidth(200)
+    pesquisa_layout.addWidget(line_edit_busca, alignment=Qt.AlignCenter)
 
     content_pesquisa_layout.addWidget(pesquisa_widget)
 
     # Conteúdo principal
     content_pri_layout = QVBoxLayout()
 
-    content_widget = QLabel("Conteúdo Principal\n" * 50)
-    content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-    scroll_area = QScrollArea()
-    scroll_area.setWidget(content_widget)
-    scroll_area.setWidgetResizable(True)  # Permitir que o widget se expanda com a área de rolagem
+    group_widget = QWidget()
+    group_layout = QVBoxLayout(group_widget)
+    group_layout.setSpacing(5)  # Espaçamento entre os elementos
 
-# Adicionar a área de rolagem ao layout do conteúdo principal
-    content_pri_layout.addWidget(scroll_area)
+    label_download = QLabel("Diretório de Download")
+    label_download.setStyleSheet("color: white; border: none;")
+    group_layout.addWidget(label_download)
 
+
+    group2_layout = QHBoxLayout()
+
+    line_download = QLineEdit()
+    line_download.setStyleSheet("color: white; padding: 5px;")
+    line_download.setPlaceholderText("C:/Users/Gabri/Downloads/")
+    line_download.setFixedWidth(200)
+    group2_layout.addWidget(line_download)
+
+    group2_layout.addSpacing(15)
+    # Terceira linha - Botão salvar
+    button_salvar = QPushButton("Salvar")
+    button_salvar.setFixedSize(50, 20)  # Definindo tamanho do botão
+    button_salvar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
+    group2_layout.addWidget(button_salvar)
+
+    group2_layout.addStretch()
+
+    group_layout.addLayout(group2_layout)
+    
+    group_layout.addStretch()
+    # Adicionar o widget ao layout principal
+    content_pri_layout.addWidget(group_widget)
     # Adicionando o layout de conteúdo ao layout principal
     content_pesquisa_layout.addLayout(content_pri_layout)
-
     
     return content_pesquisa_layout
+2
