@@ -59,7 +59,6 @@ def initUI1(self):
     content_pri_layout = QVBoxLayout()
 
     content_widget = QLabel("Conteúdo Principal\n" * 50)
-    content_widget.setFont(QFont("Lato", 11))
     content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     scroll_area = QScrollArea()
     scroll_area.setWidget(content_widget)
