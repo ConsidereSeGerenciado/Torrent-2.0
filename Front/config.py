@@ -26,7 +26,7 @@ def initUI3(self):
     content_pesquisa_layout = QVBoxLayout() 
 
     pesquisa_widget = QWidget()
-    pesquisa_widget.setStyleSheet("background-color: black; border-bottom: 2px solid white;") 
+    pesquisa_widget.setStyleSheet("background-color: #272323; border-bottom: 2px solid white;")
     pesquisa_widget.setFixedHeight(80)
     pesquisa_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -49,6 +49,7 @@ def initUI3(self):
     content_pri_layout = QVBoxLayout()
 
     content_widget = QLabel("Conteúdo Principal\n" * 50)
+    content_widget.setStyleSheet("background-color: #272323")
     content_widget.setFont(QFont("Lato", 11))
     content_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     scroll_area = QScrollArea()
