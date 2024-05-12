@@ -3,7 +3,7 @@ from PySide6.QtWidgets import (
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
     QScrollArea
 )
-from PySide6.QtGui import QPixmap, QIcon, QFont
+from PySide6.QtGui import QPixmap, QIcon, QFont, QFontDatabase
 from PySide6.QtCore import Qt, Signal
 
 class ClickableImageLabel(QLabel):
@@ -25,7 +25,10 @@ def header(self):
     main_layout = QVBoxLayout()
     self.setStyleSheet("background-color: black; color: white;")
 
-    # Área do cabeçalho
+    QFontDatabase.addApplicationFont("fonts/Abril_Fatface/AbrilFatface-Regular.ttf")
+    QFontDatabase.addApplicationFont("fonts/Lato/Lato-Black.ttf")
+
+# Área do cabeçalho
     header_widget = QWidget()
     header_widget.setStyleSheet("border-bottom: 2px solid white; background-color: black;")
     header_widget.setFixedHeight(50)
@@ -33,7 +36,7 @@ def header(self):
 
     main2_layout = QHBoxLayout(header_widget)
 
-    name_widget = QLabel("<font face='Abril Fatface' size='8'><b>PyTorrent </b></font>")
+    name_widget = QLabel("<font face='Abril Fatface' size='6'><b>PyTorrent </b></font>")
     name_widget.setStyleSheet("border-bottom: none;")
     main2_layout.addWidget(name_widget)
 
