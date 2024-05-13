@@ -76,14 +76,15 @@ def initUI2(self):
 
         # Criar um QLabel para ser adicionado ao ClickableImageLabel
         label = QLabel("Nome")
-        label.setFont(QFont("Lato", 15))
+        label.setFont(QFont("Lato", 18, QFont.Bold))
         label.setStyleSheet("border: none; padding: 0px;")
 
         # Criar um QLabel para ser adicionado ao ClickableImageLabel
         label1 = QPushButton("Abrir")
         label1.setFont(QFont("Lato", 10, QFont.Bold))
         button.setFixedSize(100, 50)
-        label1.setStyleSheet("border: 2px solid white; padding: 0px;")
+        label1.setFixedWidth(200)
+        label1.setStyleSheet("border: 2px solid white; padding: 0px; border-radius: 10px")
 
         # Criar um frame para conter os elementos
         frame = QFrame()

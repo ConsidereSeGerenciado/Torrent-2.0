@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea, QGridLayout
+    QScrollArea, QGridLayout, QSpacerItem
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -93,9 +93,11 @@ def initUI(self):
         # Criar um QLabel para ser adicionado ao ClickableImageLabel
         label = QLabel("Tipo")
         label.setAlignment(Qt.AlignBottom)  # Ajustar o alinhamento do texto
-        label.setStyleSheet("border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 6px;")
-        label.setFixedWidth(30)
+        label.setStyleSheet("border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
+        spacer = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum) # não entendi bem, mas ele coloca o tipo no canto inferior esquerdo
+        label.setFixedSize(label.sizeHint()) # faz com que o tamanho seja do mesmo que a palavra 'tipo'
         button.setLayout(QVBoxLayout())  # Definir um layout para o ClickableImageLabel
+        button.layout().addItem(spacer)
         button.layout().addWidget(label)  # Adicionar o QLabel ao layout do ClickableImageLabel
 
         col += 1
