@@ -27,7 +27,7 @@ def menu(self):
     # Área do menu
     menu_widget = QWidget()
     menu_widget.setStyleSheet("background-color: black; border-right: 2px solid white;")
-    menu_widget.setFixedWidth(100)
+    menu_widget.setFixedWidth(75)
     menu_widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
     # Layout para os botões do menu
@@ -84,10 +84,10 @@ def menu(self):
 
     button_github = ClickableImageLabel(QPixmap("Imagens/github.png"),512,512)
     button_github.setStyleSheet("border:none; padding: 0px;")
-    button_github.setFixedSize(40, 40)
+    button_github.setFixedSize(30, 30)
     button_github.clicked.connect(self.github_clicked)
 
-    button_github.setContentsMargins(10, 10, 10, 10)
+    button_github.setContentsMargins(2.5, 2.5, 2.5, 2.5)
 
     button_github.setMouseTracking(True)
     button_github.enterEvent = lambda event: self.on_enter(button_github)
@@ -97,10 +97,10 @@ def menu(self):
 
     button_config = ClickableImageLabel(QPixmap("Imagens/config.png"),512,512)
     button_config.setStyleSheet("border:none; padding: 0px;")
-    button_config.setFixedSize(40, 40)
+    button_config.setFixedSize(30, 30)
     button_config.clicked.connect(self.config_clicked)
 
-    button_config.setContentsMargins(10, 10, 10, 10)
+    button_config.setContentsMargins(5, 5, 5, 5)
 
     button_config.setMouseTracking(True)
     button_config.enterEvent = lambda event: self.on_enter(button_config)

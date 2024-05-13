@@ -26,14 +26,15 @@ def initUI(self):
     content_pesquisa_layout = QVBoxLayout() 
 
     pesquisa_widget = QWidget()
-    pesquisa_widget.setStyleSheet("background-color: black; border-bottom: 2px solid white;") 
+    pesquisa_widget.setStyleSheet("background-color: #242121; border-bottom: 2px solid white;")
     pesquisa_widget.setFixedHeight(80)
     pesquisa_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
     pesquisa_layout = QHBoxLayout(pesquisa_widget)
     pesquisa_layout.setAlignment(Qt.AlignCenter)
 
-    label_inicio = QLabel("<font face='Abril Fatface' size='8'><b>Início</b></font>")
+    label_inicio = QLabel("Início")
+    label_inicio.setFont(QFont("Abril Fatface", 30))
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
     pesquisa_layout.addWidget(label_inicio, alignment=Qt.AlignCenter)
 
@@ -42,6 +43,7 @@ def initUI(self):
     line_edit_busca = QLineEdit()
     line_edit_busca.setStyleSheet("color: white; padding: 5px;")
     line_edit_busca.setPlaceholderText("Buscar")
+    line_edit_busca.setFont(QFont("Lato", 11, QFont.Bold))
     line_edit_busca.setFixedWidth(200)
     pesquisa_layout.addWidget(line_edit_busca, alignment=Qt.AlignCenter)
 
@@ -59,6 +61,7 @@ def initUI(self):
     content_layout = QVBoxLayout(content_widget)
 
     destaques_widget = QLabel("Destaque")
+    destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
     destaques_widget.setStyleSheet("border: none; padding: 0px;")
     content_layout.addWidget(destaques_widget)
 
@@ -68,6 +71,7 @@ def initUI(self):
     content_layout.addSpacing(10)
 
     populares_widget = QLabel("Populares")
+    populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
     populares_widget.setStyleSheet("border: none; padding: 0px;")
     content_layout.addWidget(populares_widget)
 
@@ -89,7 +93,8 @@ def initUI(self):
         # Criar um QLabel para ser adicionado ao ClickableImageLabel
         label = QLabel("Tipo")
         label.setAlignment(Qt.AlignBottom)  # Ajustar o alinhamento do texto
-        label.setStyleSheet("border: none; padding: 0px; background-color: transparent")
+        label.setStyleSheet("border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 6px;")
+        label.setFixedWidth(30)
         button.setLayout(QVBoxLayout())  # Definir um layout para o ClickableImageLabel
         button.layout().addWidget(label)  # Adicionar o QLabel ao layout do ClickableImageLabel
 

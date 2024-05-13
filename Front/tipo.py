@@ -26,7 +26,7 @@ def initUI1(self):
     content_pesquisa_layout = QVBoxLayout() 
 
     pesquisa_widget = QWidget()
-    pesquisa_widget.setStyleSheet("background-color: black; border-bottom: 2px solid white;") 
+    pesquisa_widget.setStyleSheet("background-color: #242121; border-bottom: 2px solid white;")
     pesquisa_widget.setFixedHeight(80)
     pesquisa_widget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -41,7 +41,8 @@ def initUI1(self):
     pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
 
 
-    label_inicio = QLabel("<font face='Abril Fatface' size='8'><b>Tipos de midia</b></font>")
+    label_inicio = QLabel("Tipos de midia")
+    label_inicio.setFont(QFont("Abril Fatface", 30))
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
     pesquisa_layout.addWidget(label_inicio, alignment=Qt.AlignCenter)
 
@@ -50,6 +51,7 @@ def initUI1(self):
     line_edit_busca = QLineEdit()
     line_edit_busca.setStyleSheet("color: white; padding: 5px;")
     line_edit_busca.setPlaceholderText("Buscar")
+    line_edit_busca.setFont(QFont("Lato", 11, QFont.Bold))
     line_edit_busca.setFixedWidth(200)
     pesquisa_layout.addWidget(line_edit_busca, alignment=Qt.AlignCenter)
 
@@ -78,6 +80,7 @@ def initUI1(self):
 
         # Criar um QLabel para ser adicionado ao ClickableImageLabel
         label = QLabel("Tipo")
+        label.setFont(QFont("Abril FatFace", 20, QFont.Bold))
         label.setAlignment(Qt.AlignCenter)  # Ajustar o alinhamento do texto
         label.setStyleSheet("border: none; padding: 0px; background-color: transparent")
         button.setLayout(QVBoxLayout())  # Definir um layout para o ClickableImageLabel

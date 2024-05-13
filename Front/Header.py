@@ -23,7 +23,7 @@ class ClickableImageLabel(QLabel):
 def header(self):
      # Layout principal da janela
     main_layout = QVBoxLayout()
-    self.setStyleSheet("background-color: black; color: white;")
+    self.setStyleSheet("background-color: #242121; color: white;")
 
     QFontDatabase.addApplicationFont("fonts/Abril_Fatface/AbrilFatface-Regular.ttf")
     QFontDatabase.addApplicationFont("fonts/Lato/Lato-Light.ttf")
@@ -36,13 +36,14 @@ def header(self):
 
     main2_layout = QHBoxLayout(header_widget)
 
-    name_widget = QLabel("<font face='Abril Fatface' size='6'><b>PyTorrent </b></font>")
+    name_widget = QLabel("PyTorrent")
+    name_widget.setFont(QFont("Abril Fatface", 20))
     name_widget.setStyleSheet("border-bottom: none;")
     main2_layout.addWidget(name_widget)
 
     main2_layout.addStretch()
 
-    menos_button =  QPushButton(" – ")
+    menos_button = QPushButton(" – ")
     menos_button.clicked.connect(self.menos_clicked)
     menos_button.setStyleSheet("border-bottom: none; padding: 0px;")
 
