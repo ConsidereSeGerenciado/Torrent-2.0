@@ -14,8 +14,8 @@ from Home import initUI
 from tipo import initUI1
 from biblioteca import initUI2
 from config import initUI3
-
-
+from genero import initUI4
+from titulo import initUI5
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -81,7 +81,19 @@ class MainWindow(QMainWindow):
         url = 'https://github.com/gabrielmaiaaa/Torrent-2.0'
         webbrowser.open_new_tab(url)  
         print("Github clicked")
+
+    def genero_clicked(self):
+        global i
+        i = 4
+        print("Genero clicked")
+        self.update_interface()
     
+    def titulo_clicked(self):
+        global i 
+        i = 5
+        print("titulo clicked")
+        self.update_interface()
+
     def update_interface(self):
         global i
         # Limpar o layout do content_pesquisa_layout
@@ -98,6 +110,10 @@ class MainWindow(QMainWindow):
             new_layout = initUI2(self)
         elif i == 3:
             new_layout = initUI3(self)
+        elif i == 4:
+            new_layout = initUI4(self)
+        elif i == 5:
+            new_layout = initUI5(self)
 
         self.content_pesquisa_layout.addLayout(new_layout)
 
@@ -115,6 +131,18 @@ class MainWindow(QMainWindow):
             padding: 0px;
         """)
 
+    def start_progress(self):
+        self.progress_value = 0
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(self.progress_value)
+        self.timer.start(100)  # Define o intervalo de atualização em milissegundos
+
+    def update_progress(self):
+        self.progress_value += 1
+        self.progress_bar.setValue(self.progress_value)
+        if self.progress_value >= 100:
+            self.timer.stop()
+    
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow = MainWindow()

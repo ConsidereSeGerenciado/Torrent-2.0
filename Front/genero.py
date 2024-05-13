@@ -20,7 +20,7 @@ class ClickableImageLabel(QLabel):
     def mousePressEvent(self, event):
         self.clicked.emit()
 
-def initUI(self):
+def initUI4(self):
    
     # Área da pesquisa
     content_pesquisa_layout = QVBoxLayout() 
@@ -33,7 +33,14 @@ def initUI(self):
     pesquisa_layout = QHBoxLayout(pesquisa_widget)
     pesquisa_layout.setAlignment(Qt.AlignCenter)
 
-    label_inicio = QLabel("Início")
+    label_seta = ClickableImageLabel(QPixmap("Imagens/voltar.png"),512,512)
+    label_seta.setStyleSheet("border:none; padding: 0px;")
+    label_seta.clicked.connect(self.home_clicked)
+    label_seta.setStyleSheet("border-bottom: none; padding: 0px;")
+    label_seta.setFixedSize(50,30)
+    pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
+
+    label_inicio = QLabel("{categoria}")
     label_inicio.setFont(QFont("Abril Fatface", 30))
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
     pesquisa_layout.addWidget(label_inicio, alignment=Qt.AlignCenter)

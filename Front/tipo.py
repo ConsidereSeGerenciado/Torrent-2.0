@@ -75,6 +75,7 @@ def initUI1(self):
     col = 0
     for item in items:
         button = ClickableImageLabel(QPixmap("Imagens/config.png"), 270, 90)
+        button.clicked.connect(self.genero_clicked)
         button.setStyleSheet("border:2px solid white; padding: 0px;")
         content_layout1.addWidget(button, row, col)
 

@@ -41,8 +41,6 @@ def initUI2(self):
     label_seta.setFixedSize(50,30)
     pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
 
-
-
     label_inicio = QLabel("Biblioteca")
     label_inicio.setFont(QFont("Abril Fatface", 30))
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
