@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea, QFrame
+    QScrollArea, QFrame, QGridLayout
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -45,53 +45,50 @@ def initUI3(self):
     pesquisa_layout.addWidget(label_inicio)
 
     pesquisa_layout.addStretch()
-
-    line_edit_busca = QLineEdit()
-    line_edit_busca.setStyleSheet("color: white; padding: 5px;")
-    line_edit_busca.setPlaceholderText("Buscar")
-    line_edit_busca.setFont(QFont("Lato", 11, QFont.Bold))
-    line_edit_busca.setFixedWidth(200)
-    pesquisa_layout.addWidget(line_edit_busca, alignment=Qt.AlignCenter)
-
     content_pesquisa_layout.addWidget(pesquisa_widget)
 
     # Conteúdo principal
     content_pri_layout = QVBoxLayout()
 
-    group_widget = QWidget()
-    group_layout = QVBoxLayout(group_widget)
-    group_layout.setSpacing(5)  # Espaçamento entre os elementos
+    content_widget = QWidget()
+    content_layout = QVBoxLayout(content_widget)
 
     label_download = QLabel("Diretório de Download")
     label_download.setFont(QFont("Lato", 15))
     label_download.setStyleSheet("color: white; border: none;")
-    group_layout.addWidget(label_download)
+    content_layout.addWidget(label_download)
 
+    content_layout.addSpacing(5)
 
-    group2_layout = QHBoxLayout()
+    content_layout1 = QHBoxLayout()
 
-    line_download = QLineEdit()
-    line_download.setStyleSheet("color: white; padding: 5px;")
-    line_download.setPlaceholderText("C:/Users/Gabri/Downloads/")
-    line_download.setFont(QFont("Lato", 10, QFont.Bold))
-    line_download.setFixedWidth(200)
-    group2_layout.addWidget(line_download)
+    self.line_download = QLineEdit()
+    self.line_download.setStyleSheet("color: white; padding: 5px;")
+    self.line_download.setPlaceholderText("C:/Users/Gabri/Downloads/")
+    self.line_download.setReadOnly(True)
+    self.line_download.setFont(QFont("Lato", 10, QFont.Bold))
+    content_layout1.addWidget(self.line_download)
 
-    group2_layout.addSpacing(15)
-    # Terceira linha - Botão salvar
+    button_selecionar = QPushButton("Selecionar")
+    button_selecionar.setFont(QFont("Lato", 10))  # Definindo tamanho do botão
+    button_selecionar.setFixedWidth(100)
+    button_selecionar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
+    button_selecionar.clicked.connect(self.OpenFileA)
+    content_layout1.addWidget(button_selecionar)
+
+    content_layout.addLayout(content_layout1)
+    content_layout.addSpacing(20)
+
     button_salvar = QPushButton("Salvar")
     button_salvar.setFont(QFont("Lato", 10))
-    button_salvar.setFixedSize(50, 20)  # Definindo tamanho do botão
     button_salvar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
-    group2_layout.addWidget(button_salvar)
+    button_salvar.setFixedSize(100,40)
+    content_layout.addWidget(button_salvar, alignment= Qt.AlignCenter)
 
-    group2_layout.addStretch()
+    content_layout.addStretch()
 
-    group_layout.addLayout(group2_layout)
-    
-    group_layout.addStretch()
     # Adicionar o widget ao layout principal
-    content_pri_layout.addWidget(group_widget)
+    content_pri_layout.addWidget(content_widget)
     # Adicionando o layout de conteúdo ao layout principal
     content_pesquisa_layout.addLayout(content_pri_layout)
     

@@ -35,7 +35,7 @@ def initUI4(self):
 
     label_seta = ClickableImageLabel(QPixmap("Imagens/voltar.png"),512,512)
     label_seta.setStyleSheet("border:none; padding: 0px;")
-    label_seta.clicked.connect(self.home_clicked)
+    label_seta.clicked.connect(self.tipo_clicked)
     label_seta.setStyleSheet("border-bottom: none; padding: 0px;")
     label_seta.setFixedSize(50,30)
     pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)

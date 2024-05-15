@@ -1,5 +1,7 @@
 import sys
 import webbrowser
+from unidecode import unidecode
+
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
@@ -17,6 +19,17 @@ from config import initUI3
 from genero import initUI4
 from titulo import initUI5
 from upload import initUI6
+
+class ClickableImageLabel(QLabel):
+    clicked = Signal()
+
+    def __init__(self, pixmap, width, height, parent=None):
+        super().__init__(parent)
+        self.setPixmap(pixmap.scaled(width, height, Qt.IgnoreAspectRatio, Qt.SmoothTransformation))
+        self.setFixedSize(width, height)
+        
+    def mousePressEvent(self, event):
+        self.clicked.emit()
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -161,6 +174,46 @@ class MainWindow(QMainWindow):
         file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
         if file_path:
             self.directory_edit_imagem.setText(file_path)
+
+    def OpenFileA(self):
+        directory = QFileDialog.getExistingDirectory(self, "Selecione uma pasta", "/")
+        if directory:
+            self.line_download.setText(directory)
+
+    def populate_layout(self, items):
+
+        self.content_layout1.setAlignment(Qt.AlignTop)
+
+        for row, (text, image_path) in enumerate(items):
+            
+            button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
+            button1.clicked.connect(self.genero_clicked)
+            button1.setStyleSheet("border:2px solid white; padding: 0px;")
+            
+            label = QLabel(text)
+            label.setFont(QFont("Abril FatFace", 20, QFont.Bold))
+            label.setAlignment(Qt.AlignCenter)
+            label.setStyleSheet("border: none; padding: 0px; background-color: transparent")
+            
+            layout = QVBoxLayout()
+            layout.setContentsMargins(0, 0, 0, 0)  
+            layout.setSpacing(0)  
+            layout.addWidget(label, alignment=Qt.AlignCenter)
+            button1.setLayout(layout)
+
+            self.content_layout1.addWidget(button1, row // 2, row % 2)
+
+    def filtrar_conteudo(self):
+        texto_busca = unidecode(self.line_edit_busca.text().lower())
+        for i in reversed(range(self.content_layout1.count())):
+            self.content_layout1.itemAt(i).widget().setParent(None)
+
+        if texto_busca == "":
+            filtered_items = self.items
+        else:
+            filtered_items = [item for item in self.items if texto_busca in item[0].lower()]
+        
+        self.populate_layout(filtered_items)
             
 
 if __name__ == '__main__':
