@@ -63,7 +63,7 @@ def initUI3(self):
     group_layout.setSpacing(5)  # Espaçamento entre os elementos
 
     label_download = QLabel("Diretório de Download")
-    label_download.setFont(QFont("Lato", 15, QFont.Bold))
+    label_download.setFont(QFont("Lato", 15))
     label_download.setStyleSheet("color: white; border: none;")
     group_layout.addWidget(label_download)
 
@@ -80,7 +80,7 @@ def initUI3(self):
     group2_layout.addSpacing(15)
     # Terceira linha - Botão salvar
     button_salvar = QPushButton("Salvar")
-    button_salvar.setFont(QFont("Lato", 10, QFont.Bold))
+    button_salvar.setFont(QFont("Lato", 10))
     button_salvar.setFixedSize(50, 20)  # Definindo tamanho do botão
     button_salvar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
     group2_layout.addWidget(button_salvar)

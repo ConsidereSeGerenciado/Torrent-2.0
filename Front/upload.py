@@ -69,6 +69,7 @@ def initUI6(self):
     content_layout.setVerticalSpacing(13)
 
     nome_widget = QLabel('Nome: ')
+    nome_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(nome_widget,0,0)
 
     nome_widget1 = QLineEdit()
@@ -77,42 +78,51 @@ def initUI6(self):
     content_layout.addWidget(nome_widget1,0,1)
 
     arquivo_widget = QLabel('Arquivo: ')
+    arquivo_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(arquivo_widget,1,0)
 
     self.directory_edit_arquivo = QLineEdit()
     self.directory_edit_arquivo.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     self.directory_edit_arquivo.setReadOnly(True)
     self.directory_edit_arquivo.setPlaceholderText("Caminho do arquivo")
+    self.directory_edit_arquivo.setFont(QFont("Lato", 10))
     content_layout.addWidget(self.directory_edit_arquivo,1,1)
 
     self.select_button = QPushButton("Selecionar")
+    self.select_button.setFont(QFont("Lato", 10))
     self.select_button.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     self.select_button.clicked.connect(self.openFileDialog)
     content_layout.addWidget(self.select_button,1,2)
 
     midia_widget = QLabel('Tipo de midia: ')
+    midia_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(midia_widget,2,0)
 
     midia_widget1 = QComboBox()
-    midia_widget1.addItems([])
+    midia_widget1.addItems(['Jogos','Filmes','Séries','Desenhos','Animes','Mangás','Músicas','Livros','Software'])
+    midia_widget1.setFont(QFont("Lato", 10))
     midia_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     content_layout.addWidget(midia_widget1,2,1)
 
     imagem_widget = QLabel('Imagem: ')
+    imagem_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(imagem_widget,3,0)
 
     self.directory_edit_imagem = QLineEdit()
     self.directory_edit_imagem.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     self.directory_edit_imagem.setReadOnly(True)
     self.directory_edit_imagem.setPlaceholderText("Caminho do arquivo")
+    self.directory_edit_imagem.setFont(QFont("Lato", 10))
     content_layout.addWidget(self.directory_edit_imagem,3,1)
 
     self.select_button1 = QPushButton("Selecionar")
+    self.select_button1.setFont(QFont("Lato", 10))
     self.select_button1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     self.select_button1.clicked.connect(self.openFileDialog1)
     content_layout.addWidget(self.select_button1,3,2)
 
     descricao_widget = QLabel("Descrição: ")
+    descricao_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(descricao_widget,4,0)
     
     descricao_widget1 = QTextEdit ()
@@ -141,7 +151,8 @@ def initUI6(self):
     content_layout1.addWidget(self.progress_bar, alignment=Qt.AlignCenter)
 
     button_widget = QPushButton("Upload")
-    button_widget.setFixedWidth(200)
+    button_widget.setFont(QFont("Lato", 15, QFont.Bold))
+    button_widget.setFixedSize(180, 35)
     button_widget.setStyleSheet("border: 2px solid white; padding: 0px;")
     button_widget.clicked.connect(self.start_progress)
     content_layout1.addWidget(button_widget,alignment = Qt.AlignCenter)

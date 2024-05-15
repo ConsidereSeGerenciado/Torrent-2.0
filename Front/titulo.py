@@ -84,8 +84,8 @@ def initUI5(self):
     content_layout.addWidget(self.progress_bar)
 
     baixar_widget = QPushButton("Baixar")
-    baixar_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    baixar_widget.setFixedWidth(200)
+    baixar_widget.setFont(QFont("Lato", 15, QFont.Bold))
+    baixar_widget.setFixedSize(180, 35)
     baixar_widget.setStyleSheet("border: 2px solid white; padding: 0px;")
     baixar_widget.clicked.connect(self.start_progress)
     content_layout.addWidget(baixar_widget, alignment=Qt.AlignCenter)
