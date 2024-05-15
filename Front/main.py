@@ -3,7 +3,7 @@ import webbrowser
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea
+    QScrollArea,QFileDialog
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -16,6 +16,7 @@ from biblioteca import initUI2
 from config import initUI3
 from genero import initUI4
 from titulo import initUI5
+from upload import initUI6
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -71,6 +72,12 @@ class MainWindow(QMainWindow):
         print("Biblioteca clicked")
         self.update_interface()
 
+    def upload_clicked(self):
+        global i 
+        i = 6
+        print("Upload clicked")
+        self.update_interface()
+
     def config_clicked(self):
         global i
         i = 3
@@ -114,6 +121,8 @@ class MainWindow(QMainWindow):
             new_layout = initUI4(self)
         elif i == 5:
             new_layout = initUI5(self)
+        elif i == 6:
+            new_layout = initUI6(self)
 
         self.content_pesquisa_layout.addLayout(new_layout)
 
@@ -142,7 +151,18 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(self.progress_value)
         if self.progress_value >= 100:
             self.timer.stop()
+
+    def openFileDialog(self):
+        file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
+        if file_path:
+            self.directory_edit_arquivo.setText(file_path)
     
+    def openFileDialog1(self):
+        file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
+        if file_path:
+            self.directory_edit_imagem.setText(file_path)
+            
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow = MainWindow()

@@ -101,7 +101,7 @@ def initUI4(self):
 
         # Criar um QLabel para ser adicionado ao ClickableImageLabel
         label = QLabel("Tipo")
-        label.setAlignment(Qt.AlignBottom)  # Ajustar o alinhamento do texto
+        label.setAlignment(Qt.AlignBottom) 
         label.setStyleSheet("border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
         spacer = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum) # não entendi bem, mas ele coloca o tipo no canto inferior esquerdo
         label.setFixedSize(label.sizeHint()) # faz com que o tamanho seja do mesmo que a palavra 'tipo'

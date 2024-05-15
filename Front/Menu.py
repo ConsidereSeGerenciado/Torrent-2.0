@@ -79,6 +79,21 @@ def menu(self):
 
     menu_layout.addWidget(button_biblioteca, alignment=Qt.AlignCenter)
 
+    menu_layout.addSpacing(15)
+
+    button_upload = ClickableImageLabel(QPixmap("Imagens/upload.png"), 512, 512)
+    button_upload.setStyleSheet("border: none; padding: 0px;")
+    button_upload.setFixedSize(50, 50)
+    button_upload.clicked.connect(self.upload_clicked)
+
+    button_upload.setContentsMargins(5, 5, 5, 5)
+
+    button_upload.setMouseTracking(True)
+    button_upload.enterEvent = lambda event: self.on_enter(button_upload)
+    button_upload.leaveEvent = lambda event: self.on_leave(button_upload)
+
+    menu_layout.addWidget(button_upload, alignment=Qt.AlignCenter)
+
     menu2_layout = QHBoxLayout() 
     menu2_layout.setAlignment(Qt.AlignBottom)  # Define o alinhamento vertical para a parte inferior
 
