@@ -72,10 +72,10 @@ def initUI6(self):
     nome_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(nome_widget,0,0)
 
-    nome_widget1 = QLineEdit()
-    nome_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
-    nome_widget1.setPlaceholderText(" ") 
-    content_layout.addWidget(nome_widget1,0,1)
+    self.nome_widget1 = QLineEdit()
+    self.nome_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
+    self.nome_widget1.setPlaceholderText(" ") 
+    content_layout.addWidget(self.nome_widget1,0,1)
 
     arquivo_widget = QLabel('Arquivo: ')
     arquivo_widget.setFont(QFont("Lato", 12))
@@ -98,11 +98,11 @@ def initUI6(self):
     midia_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(midia_widget,2,0)
 
-    midia_widget1 = QComboBox()
-    midia_widget1.addItems(['Jogos','Filmes','Séries','Desenhos','Animes','Mangás','Músicas','Livros','Software'])
-    midia_widget1.setFont(QFont("Lato", 10))
-    midia_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
-    content_layout.addWidget(midia_widget1,2,1)
+    self.midia_widget1 = QComboBox()
+    self.midia_widget1.addItems(['','Jogos','Filmes','Séries','Desenhos','Animes','Mangás','Músicas','Livros','Software'])
+    self.midia_widget1.setFont(QFont("Lato", 10))
+    self.midia_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
+    content_layout.addWidget(self.midia_widget1,2,1)
 
     imagem_widget = QLabel('Imagem: ')
     imagem_widget.setFont(QFont("Lato", 12))
@@ -125,10 +125,10 @@ def initUI6(self):
     descricao_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(descricao_widget,4,0)
     
-    descricao_widget1 = QTextEdit ()
-    descricao_widget1.setFixedHeight(130)
-    descricao_widget1.setStyleSheet("color: white; padding: 5px;")
-    content_layout.addWidget(descricao_widget1,4,1)
+    self.descricao_widget1 = QTextEdit ()
+    self.descricao_widget1.setFixedHeight(130)
+    self.descricao_widget1.setStyleSheet("color: white; padding: 5px;")
+    content_layout.addWidget(self.descricao_widget1,4,1)
 
 
     content_layout1 = QVBoxLayout()
@@ -150,12 +150,13 @@ def initUI6(self):
     self.progress_bar.setVisible(False)
     content_layout1.addWidget(self.progress_bar, alignment=Qt.AlignCenter)
 
-    button_widget = QPushButton("Upload")
-    button_widget.setFont(QFont("Lato", 15, QFont.Bold))
-    button_widget.setFixedSize(180, 35)
-    button_widget.setStyleSheet("border: 2px solid white; padding: 0px;")
-    button_widget.clicked.connect(self.start_progress)
-    content_layout1.addWidget(button_widget,alignment = Qt.AlignCenter)
+    self.button_widget = QPushButton("Upload")
+    self.button_widget.setFont(QFont("Lato", 15, QFont.Bold))
+    self.button_widget.setFixedSize(180, 35)
+    self.button_widget.setEnabled(False) 
+    self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: gray")
+    self.button_widget.clicked.connect(self.on_upload_click)
+    content_layout1.addWidget(self.button_widget,alignment = Qt.AlignCenter)
 
     self.timer = QTimer(self)
     self.timer.timeout.connect(self.update_progress)
@@ -164,6 +165,10 @@ def initUI6(self):
     content_layout1.setAlignment(Qt.AlignCenter)
 
     content_layout.addLayout(content_layout1, 5, 0, 1, 4)
+
+    self.nome_widget1.textChanged.connect(self.check_fields)
+    self.directory_edit_arquivo.textChanged.connect(self.check_fields)
+    self.midia_widget1.currentIndexChanged.connect(self.check_fields)
     
     content_pri_layout.addWidget(content_widget)
     # Adicionando o layout de conteúdo ao layout principal

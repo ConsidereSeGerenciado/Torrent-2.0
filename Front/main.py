@@ -153,6 +153,21 @@ class MainWindow(QMainWindow):
             padding: 0px;
         """)
 
+    def check_fields(self):
+        nome_filled = bool(self.nome_widget1.text().strip())
+        arquivo_filled = bool(self.directory_edit_arquivo.text().strip())
+        midia_selected = self.midia_widget1.currentIndex() != 0
+
+        if nome_filled and arquivo_filled and midia_selected:
+            self.button_widget.setEnabled(True)
+            self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: black")
+        else:
+            self.button_widget.setEnabled(False)
+
+    def on_upload_click(self):
+        self.collect_and_upload()
+        self.start_progress()
+
     def start_progress(self):
         self.progress_value = 0
         self.progress_bar.setVisible(True)
@@ -164,6 +179,23 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(self.progress_value)
         if self.progress_value >= 100:
             self.timer.stop()
+
+    def collect_and_upload(self):
+        nome = self.nome_widget1.text()
+        diretorio_arquivo = self.directory_edit_arquivo.text()
+        tipo_midia = self.midia_widget1.currentText()
+        descricao = self.descricao_widget1.toPlainText()
+        diretorio_imagem = self.directory_edit_imagem.text()
+        
+        self.upload_arquivos(nome, diretorio_arquivo, tipo_midia, descricao, diretorio_imagem)
+
+    def upload_arquivos(self, nome, diretorio_arquivo, tipo_midia, descricao, diretorio_imagem):
+
+        print(f"Nome: {nome}")
+        print(f"Diretório do Arquivo: {diretorio_arquivo}")
+        print(f"Tipo de Mídia: {tipo_midia}")
+        print(f"Descrição: {descricao}")
+        print(f"Diretório da Imagem: {diretorio_imagem}")
 
     def openFileDialog(self):
         file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
