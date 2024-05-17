@@ -10,10 +10,8 @@ def enviar_arquivo(host_servidor, porta_servidor, caminho_arquivo, buffer_size=4
         cliente_socket.connect((host_servidor, porta_servidor))
         logging.info(f'Conectado ao servidor {host_servidor}:{porta_servidor}')
         
-        
         nome_arquivo = os.path.basename(caminho_arquivo)
         cliente_socket.send(nome_arquivo.encode())
-        
         
         with open(caminho_arquivo, 'rb') as arquivo:
             while True:
@@ -23,6 +21,11 @@ def enviar_arquivo(host_servidor, porta_servidor, caminho_arquivo, buffer_size=4
                 cliente_socket.sendall(bytes_lidos)
         
         logging.info(f'{nome_arquivo} enviado com sucesso para {host_servidor}:{porta_servidor}')
+        
+        
+        msg_confirmacao = cliente_socket.recv(buffer_size)
+        logging.info(msg_confirmacao.decode())
+        
     except Exception as e:
         logging.error(f'Erro ao enviar arquivo: {e}')
     finally:

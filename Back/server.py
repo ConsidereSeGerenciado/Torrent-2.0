@@ -3,10 +3,9 @@ import os
 import threading
 import logging
 
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def lidar_com_cliente(conn, addr, buffer_size=4096):
+def handle_client_connection(conn, addr, buffer_size=4096):
     logging.info(f'Conexão estabelecida com {addr}')
     
     try:
@@ -16,11 +15,9 @@ def lidar_com_cliente(conn, addr, buffer_size=4096):
             raise ValueError("Nome do arquivo não recebido.")
         
         caminho_arquivo = os.path.join('uploads', nome_arquivo)
+        os.makedirs(os.path.dirname(caminho_arquivo), exist_ok=True)
         
         
-        os.makedirs(os.path.dirname(caminho_arquivo), existindo_ok=True)
-        
-       
         with open(caminho_arquivo, 'wb') as arquivo:
             while True:
                 bytes_lidos = conn.recv(buffer_size)
@@ -29,6 +26,9 @@ def lidar_com_cliente(conn, addr, buffer_size=4096):
                 arquivo.write(bytes_lidos)
         
         logging.info(f'Arquivo {nome_arquivo} recebido com sucesso de {addr}')
+        
+        
+        conn.send(b'Arquivo recebido com sucesso!')
     except Exception as e:
         logging.error(f'Erro ao receber arquivo de {addr}: {e}')
     finally:
@@ -44,7 +44,7 @@ def iniciar_servidor(host='0.0.0.0', port=5001, buffer_size=4096):
     try:
         while True:
             conn, addr = servidor_socket.accept()
-            cliente_thread = threading.Thread(target=lidar_com_cliente, args=(conn, addr, buffer_size))
+            cliente_thread = threading.Thread(target=handle_client_connection, args=(conn, addr, buffer_size))
             cliente_thread.start()
     except KeyboardInterrupt:
         logging.info('Servidor interrompido manualmente')
@@ -55,5 +55,4 @@ def iniciar_servidor(host='0.0.0.0', port=5001, buffer_size=4096):
         logging.info('Servidor encerrado')
 
 if __name__ == "__main__":
-    # PRECISO DOP ENDEEREÇO DA NUVEM PARA INICIAR O SERVIDOR LÁ
     iniciar_servidor()
