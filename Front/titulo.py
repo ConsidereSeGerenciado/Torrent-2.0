@@ -95,7 +95,7 @@ def initUI5(self):
     self.progress_value = 0
 
     descricao_widget = QLabel("Descrição do titulo")
-    descricao_widget.setFont(QFont("Lato", 14, QFont.Bold))
+    descricao_widget.setFont(QFont("Lato", 20, QFont.Bold))
     descricao_widget.setStyleSheet("border: none; padding: 0px;")
     content_layout.addWidget(descricao_widget)
 

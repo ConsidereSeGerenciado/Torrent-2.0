@@ -69,8 +69,8 @@ def initUI1(self):
 
 
     self.content_layout1.setContentsMargins(40,15,0,0)
-    self.content_layout1.setHorizontalSpacing(50) 
-    self.content_layout1.setVerticalSpacing(20) 
+    self.content_layout1.setHorizontalSpacing(50)
+    self.content_layout1.setVerticalSpacing(20)
       
     self.items = [
             ("Jogos", "Imagens/Capas/jogos.jpg"),
@@ -85,7 +85,8 @@ def initUI1(self):
         ]
     
     self.populate_layout(self.items)
-    
+    self.content_layout1.setAlignment(Qt.AlignCenter)
+
     
     scroll_area.setWidget(content_widget)
     content_pri_layout.addWidget(scroll_area)
