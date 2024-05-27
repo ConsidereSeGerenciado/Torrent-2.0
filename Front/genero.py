@@ -20,7 +20,7 @@ class ClickableImageLabel(QLabel):
     def mousePressEvent(self, event):
         self.clicked.emit()
 
-def initUI4(self):
+def initUI4(self,tipo):
    
     # Área da pesquisa
     content_pesquisa_layout = QVBoxLayout() 
@@ -40,19 +40,20 @@ def initUI4(self):
     label_seta.setFixedSize(50,30)
     pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
 
-    label_inicio = QLabel("{categoria}")
+    label_inicio = QLabel(tipo)
     label_inicio.setFont(QFont("Abril Fatface", 30))
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
     pesquisa_layout.addWidget(label_inicio, alignment=Qt.AlignCenter)
 
     pesquisa_layout.addStretch()
 
-    line_edit_busca = QLineEdit()
-    line_edit_busca.setStyleSheet("color: white; padding: 5px;")
-    line_edit_busca.setPlaceholderText("Buscar")
-    line_edit_busca.setFont(QFont("Lato", 11, QFont.Bold))
-    line_edit_busca.setFixedWidth(200)
-    pesquisa_layout.addWidget(line_edit_busca, alignment=Qt.AlignCenter)
+    self.line_edit_busca = QLineEdit()
+    self.line_edit_busca.setStyleSheet("color: white; padding: 5px;")
+    self.line_edit_busca.textChanged.connect(self.filtrar_conteudo1)
+    self.line_edit_busca.setPlaceholderText("Buscar")
+    self.line_edit_busca.setFont(QFont("Lato", 11, QFont.Bold))
+    self.line_edit_busca.setFixedWidth(200)
+    pesquisa_layout.addWidget(self.line_edit_busca, alignment=Qt.AlignCenter)
 
     content_pesquisa_layout.addWidget(pesquisa_widget)
 
@@ -67,55 +68,53 @@ def initUI4(self):
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
 
-    destaques_widget = QLabel("Destaque")
-    destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    destaques_widget.setStyleSheet("border: none; padding: 0px;")
-    content_layout.addWidget(destaques_widget)
+    self.destaques_widget = QLabel("Destaque")
+    self.destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
+    self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
+    content_layout.addWidget(self.destaques_widget)
 
-    destaque_widget = ClickableImageLabel(QPixmap("Imagens/config.png"), 500, 120)
-    destaque_widget.clicked.connect(self.titulo_clicked)
-    destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
-    content_layout.addWidget(destaque_widget, alignment=Qt.AlignCenter)
+    self.destaque_widget = ClickableImageLabel(QPixmap("../Back/Imagens/Elden_Ring.png"), 600, 120)
+    self.destaque_widget.clicked.connect(self.titulo_clicked)
+    self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
+
+    label_nome = QLabel("Elden Ring")  
+    label_nome.setAlignment(Qt.AlignCenter)  
+    label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
+    label_nome.setFont(QFont("Lato", 22, QFont.Bold))
+    label_nome.setFixedSize(label_nome.sizeHint())
+
+    self.destaque_widget.setLayout(QVBoxLayout())  
+    self.destaque_widget.layout().addWidget(label_nome, alignment= Qt.AlignBottom) 
+
+    content_layout.addWidget(self.destaque_widget, alignment=Qt.AlignCenter)
     content_layout.addSpacing(10)
 
-    populares_widget = QLabel("Populares")
-    populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    populares_widget.setStyleSheet("border: none; padding: 0px;")
-    content_layout.addWidget(populares_widget)
-
+    self.populares_widget = QLabel("Populares")
+    self.populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
+    self.populares_widget.setStyleSheet("border: none; padding: 0px;")
+    content_layout.addWidget(self.populares_widget)
     # Widget para conter os itens
-    content_layout1 = QGridLayout()
+    self.content_layout1 = QGridLayout()
 
-    content_layout1.setHorizontalSpacing(50)  # Espaçamento horizontal entre as imagens
-    content_layout1.setVerticalSpacing(20)    # Espaçamento vertical entre as linhas
+    self.data_list = []
+    file_path = '../Back/Dados.txt'
 
-    # Adicionar itens de exemplo
-    items = [f"Item {i+1}" for i in range(20)]  # Exemplo de 20 itens
-    row = 0
-    col = 0
-    for item in items:
-        button = ClickableImageLabel(QPixmap("Imagens/config.png"), 270, 90)
-        button.clicked.connect(self.titulo_clicked)
-        button.setStyleSheet("border:2px solid white; padding: 0px;")
-        content_layout1.addWidget(button, row, col)
+    with open(file_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            line = line.strip()
+            elements = line.split(', ', 3)
+            tipos = elements[1]
+            if tipos == tipo:
+                tupla = tuple(elements)
+                self.data_list.append(tupla)
 
-        # Criar um QLabel para ser adicionado ao ClickableImageLabel
-        label = QLabel("Tipo")
-        label.setAlignment(Qt.AlignBottom) 
-        label.setStyleSheet("border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
-        spacer = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum) # não entendi bem, mas ele coloca o tipo no canto inferior esquerdo
-        label.setFixedSize(label.sizeHint()) # faz com que o tamanho seja do mesmo que a palavra 'tipo'
-        button.setLayout(QVBoxLayout())  # Definir um layout para o ClickableImageLabel
-        button.layout().addItem(spacer)
-        button.layout().addWidget(label)  # Adicionar o QLabel ao layout do ClickableImageLabel
+    self.content_layout1.setHorizontalSpacing(50)
+    self.content_layout1.setVerticalSpacing(20)    
+    self.content_layout1.setContentsMargins(40,15,0,0)
 
-        col += 1
-        if col == 2:
-            col = 0
-            row += 1
+    self.home_layout(self.data_list)
 
-    # Definir o layout interno de content_widget como content_layout
-    content_layout.addLayout(content_layout1)
+    content_layout.addLayout(self.content_layout1)
     
     # Adicionar content_widget ao scroll_area
     scroll_area.setWidget(content_widget)
