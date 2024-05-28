@@ -257,21 +257,19 @@ class MainWindow(QMainWindow):
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
             
             label_tipo = QLabel(tipo)
-            label_tipo.setAlignment(Qt.AlignTop | Qt.AlignLeft) 
-            label_tipo.setStyleSheet("border: 1px solid white; padding: 0px; background-color: black; border-radius: 10px;")
-            spacer_tipo = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum)
+            label_tipo.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+            label_tipo.setStyleSheet("border: 1px solid white; padding: 0px 1px 0px 1px; background-color: black; border-radius: 10px;")
             label_tipo.setFixedSize(label_tipo.sizeHint())
             
             label_nome = QLabel(name)  
-            label_nome.setAlignment(Qt.AlignBottom | Qt.AlignCenter)  
-            label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: black; border-radius: 10px;")
+            label_nome.setAlignment(Qt.AlignBottom | Qt.AlignCenter)
+            label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px 4px 0px 4px; background-color: black; border-radius: 10px;")
             label_nome.setFixedSize(label_nome.sizeHint())
 
-            button1.setLayout(QVBoxLayout())  
-            button1.layout().addItem(spacer_tipo)
+            button1.setLayout(QVBoxLayout())
             button1.layout().addWidget(label_tipo, alignment=Qt.AlignTop) 
             
-            button1.layout().addWidget(label_nome, alignment=Qt.AlignCenter) 
+            button1.layout().addWidget(label_nome, alignment=Qt.AlignHCenter)
             
             layout = QVBoxLayout()
             layout.setContentsMargins(0, 0, 0, 0)  
