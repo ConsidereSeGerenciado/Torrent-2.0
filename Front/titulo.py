@@ -20,7 +20,7 @@ class ClickableImageLabel(QLabel):
     def mousePressEvent(self, event):
         self.clicked.emit()
 
-def initUI5(self):
+def initUI5(self,name,tipo):
    
     # Área da pesquisa
     content_pesquisa_layout = QVBoxLayout() 
@@ -32,15 +32,15 @@ def initUI5(self):
 
     pesquisa_layout = QHBoxLayout(pesquisa_widget)
     pesquisa_layout.setAlignment(Qt.AlignCenter)
- 
+    
     label_seta = ClickableImageLabel(QPixmap("Imagens/voltar.png"),512,512)
     label_seta.setStyleSheet("border:none; padding: 0px;")
-    label_seta.clicked.connect(self.genero_clicked)
+    label_seta.clicked.connect(lambda tipo=tipo: self.genero_clicked(tipo))
     label_seta.setStyleSheet("border-bottom: none; padding: 0px;")
     label_seta.setFixedSize(50,30)
     pesquisa_layout.addWidget(label_seta, alignment=Qt.AlignCenter)
 
-    label_inicio = QLabel("{nome}")
+    label_inicio = QLabel(name)
     label_inicio.setFont(QFont("Abril Fatface", 30))
     label_inicio.setStyleSheet("border: none;  padding: 0px;")
     pesquisa_layout.addWidget(label_inicio, alignment=Qt.AlignCenter)
@@ -61,7 +61,10 @@ def initUI5(self):
     content_layout = QVBoxLayout(content_widget)
     content_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
-    logo_widget = ClickableImageLabel(QPixmap("Imagens/config.png"), 600, 120)
+    imagem = self.imageSearch(name)
+    descricao = self.descricaoSearch(name)
+
+    logo_widget = ClickableImageLabel(QPixmap(imagem), 600, 120)
     logo_widget.setStyleSheet("border:2px solid white; padding: 0px;")
     content_layout.addWidget(logo_widget, alignment=Qt.AlignCenter)
     content_layout.addSpacing(10)
@@ -98,6 +101,13 @@ def initUI5(self):
     descricao_widget.setFont(QFont("Lato", 16, QFont.Bold))
     descricao_widget.setStyleSheet("border: none; padding: 0px;")
     content_layout.addWidget(descricao_widget)
+    content_layout.addSpacing(10)
+
+    descricao1_widget = QLabel(descricao)
+    descricao1_widget.setWordWrap(True)
+    descricao1_widget.setFont(QFont("Lato", 12, QFont.Bold))
+    descricao1_widget.setStyleSheet("border: none; padding: 0px;")
+    content_layout.addWidget(descricao1_widget)
 
     content_layout.addStretch()
 

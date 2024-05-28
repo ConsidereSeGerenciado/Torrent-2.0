@@ -99,7 +99,7 @@ def initUI6(self):
     content_layout.addWidget(midia_widget,2,0)
 
     self.midia_widget1 = QComboBox()
-    self.midia_widget1.addItems(['','Jogos','Filmes','Séries','Desenhos','Animes','Mangás','Músicas','Livros','Software'])
+    self.midia_widget1.addItems(['','Jogos','Filmes','Series','Desenhos','Animes','Mangas','Musicas','Livros','Software'])
     self.midia_widget1.setFont(QFont("Lato", 10))
     self.midia_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     content_layout.addWidget(self.midia_widget1,2,1)

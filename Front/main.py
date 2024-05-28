@@ -1,11 +1,12 @@
 import sys
 import webbrowser
+import random
 from unidecode import unidecode
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea,QFileDialog
+    QScrollArea,QFileDialog,QSpacerItem,
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -102,19 +103,19 @@ class MainWindow(QMainWindow):
         webbrowser.open_new_tab(url)  
         print("Github clicked")
 
-    def genero_clicked(self):
+    def genero_clicked(self,name):
         global i
         i = 4
         print("Genero clicked")
-        self.update_interface()
+        self.update_interface(name)
     
-    def titulo_clicked(self):
+    def titulo_clicked(self, name,tipo):
         global i 
         i = 5
         print("titulo clicked")
-        self.update_interface()
+        self.update_interface(name,tipo)
 
-    def update_interface(self):
+    def update_interface(self,name=None,tipo=None):
         global i
         # Limpar o layout do content_pesquisa_layout
         while self.content_pesquisa_layout.count():
@@ -131,9 +132,9 @@ class MainWindow(QMainWindow):
         elif i == 3:
             new_layout = initUI3(self)
         elif i == 4:
-            new_layout = initUI4(self)
+            new_layout = initUI4(self,name)
         elif i == 5:
-            new_layout = initUI5(self)
+            new_layout = initUI5(self,name,tipo)
         elif i == 6:
             new_layout = initUI6(self)
 
@@ -190,12 +191,24 @@ class MainWindow(QMainWindow):
         self.upload_arquivos(nome, diretorio_arquivo, tipo_midia, descricao, diretorio_imagem)
 
     def upload_arquivos(self, nome, diretorio_arquivo, tipo_midia, descricao, diretorio_imagem):
+        # Se a descrição estiver vazia, define como "Sem descrição"
+        if not descricao:
+            descricao = "Sem descrição"
+        
+        # Se o diretório da imagem estiver vazio, define como "../Back/Imagens/Sem_Imagem.png"
+        if not diretorio_imagem:
+            diretorio_imagem = "../Back/Imagens/Sem_Imagem.png"
+        
+        # Formata a linha a ser adicionada ao arquivo de dados
+        linha = f"{nome}, {tipo_midia}, {diretorio_imagem}, {descricao}\n"
+        print(linha)
+        # Caminho do arquivo de dados
+        file_path = '../Back/Dados.txt'
 
-        print(f"Nome: {nome}")
-        print(f"Diretório do Arquivo: {diretorio_arquivo}")
-        print(f"Tipo de Mídia: {tipo_midia}")
-        print(f"Descrição: {descricao}")
-        print(f"Diretório da Imagem: {diretorio_imagem}")
+        # Adiciona a linha ao arquivo de dados
+        with open(file_path, 'a', encoding='utf-8') as file:
+            file.write(linha)
+
 
     def openFileDialog(self):
         file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
@@ -216,10 +229,9 @@ class MainWindow(QMainWindow):
 
         self.content_layout1.setAlignment(Qt.AlignTop)
 
-        for row, (text, image_path) in enumerate(items):
-            
+        for row, (text, image_path) in enumerate(items):    
             button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
-            button1.clicked.connect(self.genero_clicked)
+            button1.clicked.connect(lambda text=text: self.genero_clicked(text))
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
             
             label = QLabel(text)
@@ -235,6 +247,39 @@ class MainWindow(QMainWindow):
 
             self.content_layout1.addWidget(button1, row // 2, row % 2)
 
+    def home_layout(self, items):
+       
+        self.content_layout1.setAlignment(Qt.AlignTop)
+
+        for row, (name, tipo, image_path, description) in enumerate(items):
+            button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
+            button1.clicked.connect(lambda name=name, tipo=tipo: self.titulo_clicked(name,tipo))
+            button1.setStyleSheet("border:2px solid white; padding: 0px;")
+            
+            label_tipo = QLabel(tipo)
+            label_tipo.setAlignment(Qt.AlignTop | Qt.AlignLeft) 
+            label_tipo.setStyleSheet("border: 1px solid white; padding: 0px; background-color: black; border-radius: 10px;")
+            spacer_tipo = QSpacerItem(20, 40, QSizePolicy.Expanding, QSizePolicy.Minimum)
+            label_tipo.setFixedSize(label_tipo.sizeHint())
+            
+            label_nome = QLabel(name)  
+            label_nome.setAlignment(Qt.AlignBottom | Qt.AlignCenter)  
+            label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: black; border-radius: 10px;")
+            label_nome.setFixedSize(label_nome.sizeHint())
+
+            button1.setLayout(QVBoxLayout())  
+            button1.layout().addItem(spacer_tipo)
+            button1.layout().addWidget(label_tipo, alignment=Qt.AlignTop) 
+            
+            button1.layout().addWidget(label_nome, alignment=Qt.AlignCenter) 
+            
+            layout = QVBoxLayout()
+            layout.setContentsMargins(0, 0, 0, 0)  
+            layout.setSpacing(0)  
+            layout.addWidget(button1)  
+            self.content_layout1.addLayout(layout, row // 2, row % 2)
+        
+
     def filtrar_conteudo(self):
         texto_busca = unidecode(self.line_edit_busca.text().lower())
         for i in reversed(range(self.content_layout1.count())):
@@ -246,8 +291,54 @@ class MainWindow(QMainWindow):
             filtered_items = [item for item in self.items if texto_busca in item[0].lower()]
         
         self.populate_layout(filtered_items)
-            
 
+    def filtrar_conteudo1(self):
+        texto_busca = unidecode(self.line_edit_busca.text().lower())
+
+        while self.content_layout1.count():
+            child = self.content_layout1.takeAt(0)
+            if child.layout():
+                while child.layout().count():
+                    grandchild = child.layout().takeAt(0)
+                    if grandchild.widget():
+                        grandchild.widget().deleteLater()
+                child.layout().deleteLater()
+            elif child.widget():
+                child.widget().deleteLater()
+
+        if texto_busca == "":
+            filtered_items = self.data_list
+            self.destaques_widget.setVisible(True)
+            self.destaque_widget.setVisible(True)
+            self.populares_widget.setVisible(True)
+        else:
+            filtered_items = [item for item in self.data_list if texto_busca in item[0].lower()]   
+            self.destaques_widget.setVisible(False)
+            self.destaque_widget.setVisible(False)
+            self.populares_widget.setVisible(False)
+
+        self.home_layout(filtered_items)
+
+    def imageSearch(self, name):
+        file_path = '../Back/Dados.txt'
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                elements = line.split(', ', 3)
+                if elements[0] == name:
+                    return elements[2]  # Retorna o caminho da imagem
+        return None  # Retorna None se o nome não for encontrado
+
+    def descricaoSearch(self, name):
+        file_path = '../Back/Dados.txt'
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                line = line.strip()
+                elements = line.split(', ', 3)
+                if elements[0] == name:
+                    return elements[3]  # Retorna a descrição
+        return None  # Retorna None se o nome não for encontrado
+                
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
