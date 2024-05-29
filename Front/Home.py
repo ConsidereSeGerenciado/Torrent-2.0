@@ -68,7 +68,7 @@ def initUI(self):
     content_layout.addWidget(self.destaques_widget)
 
     self.destaque_widget = ClickableImageLabel(QPixmap("../Back/Imagens/Elden_Ring.png"), 600, 120)
-    self.destaque_widget.clicked.connect(self.titulo_clicked)
+    self.destaque_widget.clicked.connect(lambda: self.titulo_clicked('Elden ring', 'Jogos'))
     self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
     label_nome = QLabel("Elden Ring")  

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
@@ -62,9 +64,11 @@ def initUI3(self):
 
     content_layout1 = QHBoxLayout()
 
+    downloads_path = self.load_download_path()
+
     self.line_download = QLineEdit()
     self.line_download.setStyleSheet("color: white; padding: 5px;")
-    self.line_download.setPlaceholderText("C:/Users/Gabri/Downloads/")
+    self.line_download.setPlaceholderText(str(downloads_path))
     self.line_download.setReadOnly(True)
     self.line_download.setFont(QFont("Lato", 10, QFont.Bold))
     content_layout1.addWidget(self.line_download)
@@ -82,6 +86,8 @@ def initUI3(self):
     button_salvar = QPushButton("Salvar")
     button_salvar.setFont(QFont("Lato", 10))
     button_salvar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
+    button_salvar.clicked.connect(lambda: self.save_download_path(Path(self.line_download.text())))
+
     button_salvar.setFixedSize(100,40)
     content_layout.addWidget(button_salvar, alignment= Qt.AlignCenter)
 

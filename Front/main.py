@@ -1,6 +1,8 @@
 import sys
 import webbrowser
-import random
+import os
+import json
+from pathlib import Path
 from unidecode import unidecode
 
 from PySide6.QtWidgets import (
@@ -20,6 +22,8 @@ from config import initUI3
 from genero import initUI4
 from titulo import initUI5
 from upload import initUI6
+
+CONFIG_FILE = '../Back/config.json'
 
 class ClickableImageLabel(QLabel):
     clicked = Signal()
@@ -194,7 +198,6 @@ class MainWindow(QMainWindow):
         # Se a descrição estiver vazia, define como "Sem descrição"
         if not descricao:
             descricao = "Sem descrição"
-        
         # Se o diretório da imagem estiver vazio, define como "../Back/Imagens/Sem_Imagem.png"
         if not diretorio_imagem:
             diretorio_imagem = "../Back/Imagens/Sem_Imagem.png"
@@ -202,7 +205,7 @@ class MainWindow(QMainWindow):
         # Formata a linha a ser adicionada ao arquivo de dados
         linha = f"{nome}, {tipo_midia}, {diretorio_imagem}, {descricao}\n"
         print(linha)
-        # Caminho do arquivo de dados
+        # Caminho dcd o arquivo de dados
         file_path = '../Back/Dados.txt'
 
         # Adiciona a linha ao arquivo de dados
@@ -221,15 +224,17 @@ class MainWindow(QMainWindow):
             self.directory_edit_imagem.setText(file_path)
 
     def OpenFileA(self):
-        directory = QFileDialog.getExistingDirectory(self, "Selecione uma pasta", "/")
-        if directory:
-            self.line_download.setText(directory)
+        folder = QFileDialog.getExistingDirectory(self, 'Selecionar Pasta', str(Path.home()))
+        if folder:
+            downloads_path = Path(folder)
+            self.line_download.setText(str(downloads_path))
 
     def populate_layout(self, items):
 
+        sorted_items = sorted(items, key=lambda x: x[0])
         self.content_layout1.setAlignment(Qt.AlignTop)
 
-        for row, (text, image_path) in enumerate(items):    
+        for row, (text, image_path) in enumerate(sorted_items):    
             button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
             button1.clicked.connect(lambda text=text: self.genero_clicked(text))
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
@@ -248,10 +253,11 @@ class MainWindow(QMainWindow):
             self.content_layout1.addWidget(button1, row // 2, row % 2)
 
     def home_layout(self, items):
-       
+
+        sorted_items = sorted(items, key=lambda x: x[0])
         self.content_layout1.setAlignment(Qt.AlignTop)
 
-        for row, (name, tipo, image_path, description) in enumerate(items):
+        for row, (name, tipo, image_path, description) in enumerate(sorted_items):
             button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
             button1.clicked.connect(lambda name=name, tipo=tipo: self.titulo_clicked(name,tipo))
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
@@ -336,7 +342,23 @@ class MainWindow(QMainWindow):
                 if elements[0] == name:
                     return elements[3]  # Retorna a descrição
         return None  # Retorna None se o nome não for encontrado
-                
+    
+    def load_download_path(self):
+        config_path = Path(CONFIG_FILE)
+        if not config_path.exists():
+            default_path = Path.home() / 'Downloads'
+            self.save_download_path(default_path)
+            return default_path
+
+        with config_path.open('r') as f:
+            config = json.load(f)
+            downloads_path = Path(config.get('downloads_path', str(Path.home() / 'Downloads')))
+            return downloads_path
+    
+    def save_download_path(self, path):
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump({'downloads_path': str(path)}, f) 
+                    
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
