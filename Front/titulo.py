@@ -61,8 +61,8 @@ def initUI5(self,name,tipo):
     content_layout = QVBoxLayout(content_widget)
     content_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
-    imagem = self.imageSearch(name)
-    descricao = self.descricaoSearch(name)
+    imagem = self.imageSearch(name,tipo)
+    descricao = self.descricaoSearch(name,tipo)
 
     logo_widget = ClickableImageLabel(QPixmap(imagem), 600, 120)
     logo_widget.setStyleSheet("border:2px solid white; padding: 0px;")

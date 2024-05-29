@@ -323,24 +323,26 @@ class MainWindow(QMainWindow):
 
         self.home_layout(filtered_items)
 
-    def imageSearch(self, name):
+    def imageSearch(self, name,tipo):
         file_path = '../Back/Dados.txt'
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 line = line.strip()
                 elements = line.split(', ', 3)
                 if elements[0] == name:
-                    return elements[2]  # Retorna o caminho da imagem
+                    if elements[1] == tipo:
+                        return elements[2]  # Retorna o caminho da imagem
         return None  # Retorna None se o nome não for encontrado
 
-    def descricaoSearch(self, name):
+    def descricaoSearch(self, name,tipo):
         file_path = '../Back/Dados.txt'
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 line = line.strip()
                 elements = line.split(', ', 3)
                 if elements[0] == name:
-                    return elements[3]  # Retorna a descrição
+                    if elements[1] == tipo:
+                        return elements[3]  # Retorna a descrição
         return None  # Retorna None se o nome não for encontrado
     
     def load_download_path(self):
