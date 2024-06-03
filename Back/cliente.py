@@ -1,32 +1,46 @@
 import socket
+import os
 
-def send_file(filename, server_address, server_port):
-    # Cria o socket TCP/IP
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+HOST = "localhost"  # Endereço do servidor
+PORT = 5000  # Porta do servidor
 
-    try:
-        # Conecta o socket ao servidor
-        client_socket.connect((server_address, server_port))
+def main():
+    # Conectar ao servidor
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+        client_socket.connect((HOST, PORT))
 
-        # Envia o nome do arquivo
-        client_socket.send(filename.encode())
+        # Receber o comando do usuário
+        command = input("Digite DOWNLOAD para baixar ou UPLOAD para enviar um arquivo: ").upper()
+        client_socket.send(command.encode('utf-8'))
 
-        # Abre o arquivo para leitura binária
-        with open(filename, 'rb') as f:
-            # Envia os dados do arquivo para o servidor
-            data = f.read(1024)
-            while data:
-                client_socket.send(data)
-                data = f.read(1024)
+        if command == "DOWNLOAD":
+            filename = input("Digite o nome do arquivo para baixar: ")
+            client_socket.send(filename.encode('utf-8'))
 
-    except Exception as e:
-        print(f"Erro ao enviar arquivo: {e}")
-    finally:
-        client_socket.close()
+            # Receber o arquivo do servidor e salvá-lo localmente
+            with open(filename, 'wb') as file:
+                file_data = client_socket.recv(1024)
+                while file_data:
+                    file.write(file_data)
+                    file_data = client_socket.recv(1024)
+            print(f"Arquivo {filename} baixado com sucesso!")
+
+        elif command == "UPLOAD":
+            filename = input("Digite o nome do arquivo para enviar: ")
+            if not os.path.exists(filename):
+                print(f"Erro: Arquivo {filename} não encontrado.")
+                return
+
+            # Enviar o arquivo para o servidor
+            with open(filename, 'rb') as file:
+                file_data = file.read(1024)
+                while file_data:
+                    client_socket.send(file_data)
+                    file_data = file.read(1024)
+            print(f"Arquivo {filename} enviado com sucesso!")
+
+        else:
+            print("Comando inválido.")
 
 if __name__ == "__main__":
-    server_address = 'localhost'  # Endereço IP do servidor
-    server_port = 5000  # Porta do servidor
-    filename = "/home/martins/Downloads/avl.c"  # Caminho do arquivo a ser enviado
-
-    send_file(filename, server_address, server_port)
+    main()
