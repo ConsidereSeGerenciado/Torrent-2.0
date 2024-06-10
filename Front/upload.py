@@ -104,23 +104,6 @@ def initUI6(self):
     self.midia_widget1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
     content_layout.addWidget(self.midia_widget1,2,1)
 
-    imagem_widget = QLabel('Imagem: ')
-    imagem_widget.setFont(QFont("Lato", 12))
-    content_layout.addWidget(imagem_widget,3,0)
-
-    self.directory_edit_imagem = QLineEdit()
-    self.directory_edit_imagem.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
-    self.directory_edit_imagem.setReadOnly(True)
-    self.directory_edit_imagem.setPlaceholderText("Caminho do arquivo")
-    self.directory_edit_imagem.setFont(QFont("Lato", 10))
-    content_layout.addWidget(self.directory_edit_imagem,3,1)
-
-    self.select_button1 = QPushButton("Selecionar")
-    self.select_button1.setFont(QFont("Lato", 10))
-    self.select_button1.setStyleSheet("border: 1px solid white; color: white; padding: 5px;")
-    self.select_button1.clicked.connect(self.openFileDialog1)
-    content_layout.addWidget(self.select_button1,3,2)
-
     descricao_widget = QLabel("Descrição: ")
     descricao_widget.setFont(QFont("Lato", 12))
     content_layout.addWidget(descricao_widget,4,0)
@@ -129,7 +112,6 @@ def initUI6(self):
     self.descricao_widget1.setFixedHeight(130)
     self.descricao_widget1.setStyleSheet("color: white; padding: 5px;")
     content_layout.addWidget(self.descricao_widget1,4,1)
-
 
     content_layout1 = QVBoxLayout()
 

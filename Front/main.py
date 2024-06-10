@@ -190,20 +190,16 @@ class MainWindow(QMainWindow):
         diretorio_arquivo = self.directory_edit_arquivo.text()
         tipo_midia = self.midia_widget1.currentText()
         descricao = self.descricao_widget1.toPlainText()
-        diretorio_imagem = self.directory_edit_imagem.text()
         
-        self.upload_arquivos(nome, diretorio_arquivo, tipo_midia, descricao, diretorio_imagem)
+        self.upload_arquivos(nome, diretorio_arquivo, tipo_midia, descricao)
 
-    def upload_arquivos(self, nome, diretorio_arquivo, tipo_midia, descricao, diretorio_imagem):
+    def upload_arquivos(self, nome, diretorio_arquivo, tipo_midia, descricao):
         # Se a descrição estiver vazia, define como "Sem descrição"
         if not descricao:
             descricao = "Sem descrição"
-        # Se o diretório da imagem estiver vazio, define como "../Back/Imagens/Sem_Imagem.png"
-        if not diretorio_imagem:
-            diretorio_imagem = "../Back/Imagens/Sem_Imagem.png"
-        
+    
         # Formata a linha a ser adicionada ao arquivo de dados
-        linha = f"{nome}, {tipo_midia}, {diretorio_imagem}, {descricao}\n"
+        linha = f"{nome}, {tipo_midia}, {descricao}\n"
         print(linha)
         # Caminho dcd o arquivo de dados
         file_path = '../Back/Dados.txt'
@@ -257,8 +253,8 @@ class MainWindow(QMainWindow):
         sorted_items = sorted(items, key=lambda x: x[0])
         self.content_layout1.setAlignment(Qt.AlignTop)
 
-        for row, (name, tipo, image_path, description) in enumerate(sorted_items):
-            button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
+        for row, (name, tipo, description) in enumerate(sorted_items):
+            button1 = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 270, 90)
             button1.clicked.connect(lambda name=name, tipo=tipo: self.titulo_clicked(name,tipo))
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
             
@@ -323,26 +319,16 @@ class MainWindow(QMainWindow):
 
         self.home_layout(filtered_items)
 
-    def imageSearch(self, name,tipo):
-        file_path = '../Back/Dados.txt'
-        with open(file_path, 'r', encoding='utf-8') as file:
-            for line in file:
-                line = line.strip()
-                elements = line.split(', ', 3)
-                if elements[0] == name:
-                    if elements[1] == tipo:
-                        return elements[2]  # Retorna o caminho da imagem
-        return None  # Retorna None se o nome não for encontrado
-
+    
     def descricaoSearch(self, name,tipo):
         file_path = '../Back/Dados.txt'
         with open(file_path, 'r', encoding='utf-8') as file:
             for line in file:
                 line = line.strip()
-                elements = line.split(', ', 3)
+                elements = line.split(', ', 2)
                 if elements[0] == name:
                     if elements[1] == tipo:
-                        return elements[3]  # Retorna a descrição
+                        return elements[2]  # Retorna a descrição
         return None  # Retorna None se o nome não for encontrado
     
     def load_download_path(self):

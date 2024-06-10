@@ -67,7 +67,7 @@ def initUI(self):
     self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
     content_layout.addWidget(self.destaques_widget)
 
-    self.destaque_widget = ClickableImageLabel(QPixmap("../Back/Imagens/Elden_Ring.png"), 600, 120)
+    self.destaque_widget = ClickableImageLabel(QPixmap("Imagens/cinza.png"), 600, 120)
     self.destaque_widget.clicked.connect(lambda: self.titulo_clicked('Elden ring', 'Jogos'))
     self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
@@ -99,9 +99,9 @@ def initUI(self):
     with open(file_path, 'r', encoding='utf-8') as file:
         for line in file:
             line = line.strip()
-            elements = line.split(', ', 3)
+            elements = line.split(', ', 2)
             tipo = elements[1]
-            if contagem_tipos[tipo] < 2:  # Verifique se já foram adicionados menos de dois itens desse tipo
+            if contagem_tipos[tipo] < 2:
                 tupla = tuple(elements)
                 self.data_list.append(tupla)
                 contagem_tipos[tipo] += 1
