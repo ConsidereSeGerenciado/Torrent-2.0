@@ -62,26 +62,34 @@ def initUI(self):
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
 
-    self.destaques_widget = QLabel("Destaque")
-    self.destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
-    content_layout.addWidget(self.destaques_widget)
 
-    self.destaque_widget = ClickableImageLabel(QPixmap("Imagens/cinza.png"), 600, 120)
-    self.destaque_widget.clicked.connect(lambda: self.titulo_clicked('Elden ring', 'Jogos'))
-    self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
+    self.data_list = self.ListaAtualizada()
 
-    label_nome = QLabel("Elden Ring")  
-    label_nome.setAlignment(Qt.AlignCenter)  
-    label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
-    label_nome.setFont(QFont("Lato", 22, QFont.Bold))
-    label_nome.setFixedSize(label_nome.sizeHint())
+    if self.data_list != []:
+        primeiro_torrent = self.data_list[0]
+        nome_do_primeiro_torrent = primeiro_torrent['nome']
+        tipo_do_primeiro_torrent = primeiro_torrent['tipo_midia']
 
-    self.destaque_widget.setLayout(QVBoxLayout())  
-    self.destaque_widget.layout().addWidget(label_nome, alignment= Qt.AlignBottom) 
+        self.destaques_widget = QLabel("Destaque")
+        self.destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
+        self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
+        content_layout.addWidget(self.destaques_widget)
 
-    content_layout.addWidget(self.destaque_widget, alignment=Qt.AlignCenter)
-    content_layout.addSpacing(10)
+        self.destaque_widget = ClickableImageLabel(QPixmap("Imagens/cinza.png"), 600, 120)
+        self.destaque_widget.clicked.connect(lambda: self.titulo_clicked(nome_do_primeiro_torrent, tipo_do_primeiro_torrent))
+        self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
+
+        label_nome = QLabel(nome_do_primeiro_torrent)  
+        label_nome.setAlignment(Qt.AlignCenter)  
+        label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
+        label_nome.setFont(QFont("Lato", 22, QFont.Bold))
+        label_nome.setFixedSize(label_nome.sizeHint())
+
+        self.destaque_widget.setLayout(QVBoxLayout())  
+        self.destaque_widget.layout().addWidget(label_nome, alignment= Qt.AlignBottom) 
+
+        content_layout.addWidget(self.destaque_widget, alignment=Qt.AlignCenter)
+        content_layout.addSpacing(10)
 
     self.populares_widget = QLabel("Populares")
     self.populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
@@ -89,23 +97,7 @@ def initUI(self):
     content_layout.addWidget(self.populares_widget)
     # Widget para conter os itens
     self.content_layout1 = QGridLayout()
-
-    contagem_tipos = {'Jogos': 0, 'Filmes': 0, 'Series': 0, 'Desenhos': 0, 'Animes': 0, 'Mangas': 0, 'Musicas': 0, 'Livros': 0, 'Software': 0}
-
-    self.data_list = []
-    file_path = '../Back/Dados.txt'
-
-    # Leia o arquivo e conte os itens de cada tipo de mídia
-    with open(file_path, 'r', encoding='utf-8') as file:
-        for line in file:
-            line = line.strip()
-            elements = line.split(', ', 2)
-            tipo = elements[1]
-            if contagem_tipos[tipo] < 2:
-                tupla = tuple(elements)
-                self.data_list.append(tupla)
-                contagem_tipos[tipo] += 1
-
+   
     self.content_layout1.setHorizontalSpacing(50)
     self.content_layout1.setVerticalSpacing(20)    
     self.content_layout1.setContentsMargins(40,15,0,0)

@@ -5,10 +5,19 @@ import json
 from pathlib import Path
 from unidecode import unidecode
 
+import requests
+import bencodepy
+import hashlib
+import random
+import string
+from torrentool.api import Torrent
+import time
+import threading
+
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea,QFileDialog,QSpacerItem,
+    QScrollArea,QFileDialog,QSpacerItem, QDialogButtonBox, QDialog
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal
@@ -36,15 +45,20 @@ class ClickableImageLabel(QLabel):
     def mousePressEvent(self, event):
         self.clicked.emit()
 
+
+torrents_info = []
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+       
 
     def initUI(self):
         self.setWindowTitle("PyTorrent")
         self.setGeometry(100, 100, 800, 600)
         self.setWindowFlag(Qt.FramelessWindowHint)
+
+        self.get_all_torrents_info()
 
         self.content_header = header(self)
         self.content_menu = menu(self)
@@ -56,6 +70,7 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.content_header)
         self.setCentralWidget(self.central_widget)
+        pass
 
     def menos_clicked(self):
         print("menos clicked")
@@ -185,39 +200,169 @@ class MainWindow(QMainWindow):
         if self.progress_value >= 100:
             self.timer.stop()
 
+    def generate_peer_id(self, size=20):
+        # Gera um identificador de peer único com 20 caracteres aleatórios
+        return ''.join(random.choices(string.ascii_letters + string.digits, k=size))
+
+
+    def create_torrent(self,input_path, output_dir, trackers=None):
+        try:
+            # Cria o objeto Torrent a partir do caminho de entrada
+            torrent = Torrent.create_from(input_path)
+            
+            # Obtém o nome do arquivo sem o caminho completo
+            file_name = os.path.basename(input_path)
+            
+            # Define o caminho completo para o arquivo .torrent
+            output_file = os.path.join(output_dir, f"{file_name}.torrent")
+            
+            # Salva o arquivo .torrent no diretório especificado
+            torrent.to_file(output_file)
+            
+            print(f"Arquivo .torrent criado em: {output_file}")
+
+            return output_file
+        except Exception as e:
+            print(f"Erro ao criar torrent: {e}")
+            raise  # Re-raise the exception to propagate it further
+    
     def collect_and_upload(self):
         nome = self.nome_widget1.text()
         diretorio_arquivo = self.directory_edit_arquivo.text()
         tipo_midia = self.midia_widget1.currentText()
         descricao = self.descricao_widget1.toPlainText()
-        
-        self.upload_arquivos(nome, diretorio_arquivo, tipo_midia, descricao)
 
-    def upload_arquivos(self, nome, diretorio_arquivo, tipo_midia, descricao):
+        downloads_path = self.load_download_path()
+        Ctorrent = self.create_torrent(str(diretorio_arquivo), downloads_path)
+        self.upload_arquivos(nome, Ctorrent, tipo_midia, descricao)
+
+    def upload_arquivos(self, nome, torrent_path, tipo_midia, descricao):
         # Se a descrição estiver vazia, define como "Sem descrição"
         if not descricao:
             descricao = "Sem descrição"
+
+        with open(torrent_path, 'rb') as f:
+            torrent_content = f.read()
+
+        tracker_url = 'http://localhost:6969/tracker'
+        # Substitua 'sample_torrent_file_content' pelo conteúdo real do seu arquivo .torrent
+        info_hash = hashlib.sha1(torrent_content).digest()
+        peer_id = self.generate_peer_id()
+        port = 6881
+        uploaded = 0
+        downloaded = 0
+        left = 0
+        event = 'started'
+
+        params = {
+            'info_hash': info_hash,
+            'nome': nome,
+            'tipo_midia': tipo_midia,
+            'descricao': descricao,
+            'peer_id': peer_id,
+            'port': port,
+            'uploaded': uploaded,
+            'downloaded': downloaded,
+            'left': left,
+            'event': event
+        }
+
+        # Converte info_hash e peer_id para formato adequado (URL encoded)
+        encoded_params = {
+            'info_hash': requests.utils.quote(info_hash),
+            'nome': nome,
+            'tipo_midia': tipo_midia,
+            'descricao': descricao,
+            'peer_id': peer_id,
+            'port': port,
+            'uploaded': uploaded,
+            'downloaded': downloaded,
+            'left': left,
+            'event': event
+        }
+
+        response = requests.get(tracker_url, params=encoded_params)
+
+        if response.status_code == 200:
+            response_data = bencodepy.decode(response.content)
+            print('Response from tracker:', response_data)
+            threading.Thread(target=self.keep_alive, args=(info_hash,)).start()
+        else:
+            print('Failed to connect to tracker:', response.status_code)
     
-        # Formata a linha a ser adicionada ao arquivo de dados
-        linha = f"{nome}, {tipo_midia}, {descricao}\n"
-        print(linha)
-        # Caminho dcd o arquivo de dados
-        file_path = '../Back/Dados.txt'
+    def keep_alive(self, info_hash):
+        while True:
+            time.sleep(1500)  # Espera por 1500 segundos (25 minutos) para garantir renovação antes de 1800 segundos
+            params = {
+                'info_hash': requests.utils.quote(info_hash),
+                'peer_id': self.peer_id,
+                'port': 6881,
+                'uploaded': 0,
+                'downloaded': 0,
+                'left': 0,
+                'event': 'keep-alive'
+            }
 
-        # Adiciona a linha ao arquivo de dados
-        with open(file_path, 'a', encoding='utf-8') as file:
-            file.write(linha)
+            response = requests.get(self.tracker_url, params=params)
 
+            if response.status_code == 200:
+                print('Keep-alive response from tracker:', response.content)
+            else:
+                print('Failed to send keep-alive to tracker:', response.status_code)
+        
+    def get_all_torrents_info(self):
+        tracker_url = 'http://localhost:6969/tracker/torrents'
+        global torrents_info
+        
+        try:
+            response = requests.get(tracker_url)
+            response.raise_for_status()  # Raise exception for 4xx or 5xx errors
+            decoded_data = bencodepy.decode(response.content)
+            
+            torrents_info = [
+            {
+                key.decode(): value.decode() if isinstance(value, bytes) else value
+                for key, value in item.items()
+            }
+            for item in decoded_data
+            ]
+
+            return  torrents_info
+
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching torrents info: {e}")
+        
+        return b''  # Retorna uma string vazia codificada em Bencode se algo der errado
+    
+    def ListaAtualizada(self):
+        global torrents_info
+        return torrents_info
 
     def openFileDialog(self):
-        file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
-        if file_path:
-            self.directory_edit_arquivo.setText(file_path)
+       # Criação do diálogo para seleção de arquivos
+        dialog = QFileDialog()
+        dialog.setFileMode(QFileDialog.AnyFile)
+        dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+        
+        # Adiciona botão para selecionar pasta
+        button_box = dialog.findChild(QDialogButtonBox)
+        select_folder_button = QPushButton("Selecionar Pasta", dialog)
+        button_box.addButton(select_folder_button, QDialogButtonBox.ActionRole)
+        
+        # Conecta o botão para abrir o diálogo de seleção de pasta
+        select_folder_button.clicked.connect(lambda: self.selectFolder(dialog))
+
+        if dialog.exec():
+            selected_files = dialog.selectedFiles()
+            if selected_files:
+                self.directory_edit_arquivo.setText(selected_files[0])
     
-    def openFileDialog1(self):
-        file_path, _ = QFileDialog.getOpenFileName(None, "Selecionar Arquivo")
-        if file_path:
-            self.directory_edit_imagem.setText(file_path)
+    def selectFolder(self, dialog):
+        folder_path = QFileDialog.getExistingDirectory(None, "Selecionar Pasta", "")
+        if folder_path:
+            self.directory_edit_arquivo.setText(folder_path)
+            dialog.reject()  # Fecha o diálogo de arquivo
+
 
     def OpenFileA(self):
         folder = QFileDialog.getExistingDirectory(self, 'Selecionar Pasta', str(Path.home()))
@@ -250,10 +395,13 @@ class MainWindow(QMainWindow):
 
     def home_layout(self, items):
 
-        sorted_items = sorted(items, key=lambda x: x[0])
+        sorted_items = sorted(items, key=lambda x: x['nome'])  
         self.content_layout1.setAlignment(Qt.AlignTop)
 
-        for row, (name, tipo, description) in enumerate(sorted_items):
+        for idx, item  in enumerate(sorted_items):
+            name = item['nome']
+            tipo = item['tipo_midia']
+            description = item['descricao']
             button1 = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 270, 90)
             button1.clicked.connect(lambda name=name, tipo=tipo: self.titulo_clicked(name,tipo))
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
@@ -277,7 +425,7 @@ class MainWindow(QMainWindow):
             layout.setContentsMargins(0, 0, 0, 0)  
             layout.setSpacing(0)  
             layout.addWidget(button1)  
-            self.content_layout1.addLayout(layout, row // 2, row % 2)
+            self.content_layout1.addLayout(layout, idx // 2, idx % 2)
         
 
     def filtrar_conteudo(self):
@@ -321,15 +469,11 @@ class MainWindow(QMainWindow):
 
     
     def descricaoSearch(self, name,tipo):
-        file_path = '../Back/Dados.txt'
-        with open(file_path, 'r', encoding='utf-8') as file:
-            for line in file:
-                line = line.strip()
-                elements = line.split(', ', 2)
-                if elements[0] == name:
-                    if elements[1] == tipo:
-                        return elements[2]  # Retorna a descrição
-        return None  # Retorna None se o nome não for encontrado
+        data_list = self.ListaAtualizada()
+        for item in data_list:
+            if item['nome'] == name and item['tipo_midia'] == tipo:
+                return item['descricao']
+        
     
     def load_download_path(self):
         config_path = Path(CONFIG_FILE)
