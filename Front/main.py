@@ -286,16 +286,17 @@ class MainWindow(QMainWindow):
         if response.status_code == 200:
             response_data = bencodepy.decode(response.content)
             print('Response from tracker:', response_data)
-            threading.Thread(target=self.keep_alive, args=(info_hash,)).start()
+            threading.Thread(target=self.keep_alive, args=(info_hash, peer_id)).start()
         else:
             print('Failed to connect to tracker:', response.status_code)
     
-    def keep_alive(self, info_hash):
+    def keep_alive(self, info_hash, peer_id):
+        tracker_url = 'http://localhost:6969/tracker/update'
         while True:
             time.sleep(1500)  # Espera por 1500 segundos (25 minutos) para garantir renovação antes de 1800 segundos
             params = {
                 'info_hash': requests.utils.quote(info_hash),
-                'peer_id': self.peer_id,
+                'peer_id': peer_id,
                 'port': 6881,
                 'uploaded': 0,
                 'downloaded': 0,
@@ -303,7 +304,7 @@ class MainWindow(QMainWindow):
                 'event': 'keep-alive'
             }
 
-            response = requests.get(self.tracker_url, params=params)
+            response = requests.get(tracker_url, params=params)
 
             if response.status_code == 200:
                 print('Keep-alive response from tracker:', response.content)
