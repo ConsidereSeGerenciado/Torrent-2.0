@@ -74,7 +74,6 @@ def initUI4(self,tipo):
     content_layout.addWidget(self.destaques_widget)
 
     self.data_list = self.ListaAtualizada()
-    print(self.data_list)
 
     self.itens_filtrados = []
     for item in self.data_list:

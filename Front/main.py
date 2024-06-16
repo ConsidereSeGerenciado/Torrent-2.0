@@ -13,6 +13,7 @@ import string
 from torrentool.api import Torrent
 import time
 import threading
+import socket
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
@@ -33,7 +34,7 @@ from titulo import initUI5
 from upload import initUI6
 
 CONFIG_FILE = '../Back/config.json'
-
+    
 class ClickableImageLabel(QLabel):
     clicked = Signal()
 
@@ -188,7 +189,19 @@ class MainWindow(QMainWindow):
         self.collect_and_upload()
         self.start_progress()
 
+    dados = []
+    def on_download_click(self, info_hash):
+        global dados  
+        dados = self.download_peer(info_hash)
+
     def start_progress(self):
+        self.progress_value = 0
+        self.progress_bar.setVisible(True)
+        self.progress_bar.setValue(self.progress_value)
+        self.timer.start(100)      
+
+    def start_progress1(self):
+        global dados
         self.progress_value = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(self.progress_value)
@@ -282,10 +295,12 @@ class MainWindow(QMainWindow):
         }
 
         response = requests.get(tracker_url, params=encoded_params)
-
+        
         if response.status_code == 200:
             response_data = bencodepy.decode(response.content)
             print('Response from tracker:', response_data)
+
+            info_hash = encoded_params['info_hash']
             threading.Thread(target=self.keep_alive, args=(info_hash, peer_id)).start()
         else:
             print('Failed to connect to tracker:', response.status_code)
@@ -295,7 +310,7 @@ class MainWindow(QMainWindow):
         while True:
             time.sleep(1500)  # Espera por 1500 segundos (25 minutos) para garantir renovação antes de 1800 segundos
             params = {
-                'info_hash': requests.utils.quote(info_hash),
+                'info_hash': info_hash,
                 'peer_id': peer_id,
                 'port': 6881,
                 'uploaded': 0,
@@ -319,7 +334,7 @@ class MainWindow(QMainWindow):
             response = requests.get(tracker_url)
             response.raise_for_status()  # Raise exception for 4xx or 5xx errors
             decoded_data = bencodepy.decode(response.content)
-            
+
             torrents_info = [
             {
                 key.decode(): value.decode() if isinstance(value, bytes) else value
@@ -337,6 +352,27 @@ class MainWindow(QMainWindow):
     
     def ListaAtualizada(self):
         global torrents_info
+        return torrents_info
+    
+    def download_peer(self, info_hash):
+        tracker_url = 'http://localhost:6969/tracker/download'
+
+        params = {
+            'info_hash': info_hash,
+        }
+
+        response = requests.get(tracker_url, params=params)
+        response.raise_for_status() 
+        decoded_data = bencodepy.decode(response.content)
+
+        torrents_info = [
+            {
+                key.decode(): value.decode() if isinstance(value, bytes) else value
+                for key, value in item.items()
+            }
+            for item in decoded_data
+            ]
+        print(torrents_info)
         return torrents_info
 
     def openFileDialog(self):
@@ -474,6 +510,12 @@ class MainWindow(QMainWindow):
         for item in data_list:
             if item['nome'] == name and item['tipo_midia'] == tipo:
                 return item['descricao']
+    
+    def hashSearch(self,name,tipo):
+        data_list = self.ListaAtualizada()
+        for item in data_list:
+            if item['nome'] == name and item['tipo_midia'] == tipo:
+                return item['info_hash']
         
     
     def load_download_path(self):

@@ -62,6 +62,8 @@ def initUI5(self,name,tipo):
     content_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
     descricao = self.descricaoSearch(name,tipo)
+    info_hash = self.hashSearch(name,tipo)
+    self.on_download_click(info_hash)
 
     logo_widget = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 600, 120)
     logo_widget.setStyleSheet("border:2px solid white; padding: 0px;")
@@ -89,7 +91,7 @@ def initUI5(self,name,tipo):
     baixar_widget.setFont(QFont("Lato", 15, QFont.Bold))
     baixar_widget.setFixedSize(180, 35)
     baixar_widget.setStyleSheet("border: 2px solid white; padding: 0px;")
-    baixar_widget.clicked.connect(self.start_progress)
+    baixar_widget.clicked.connect(self.start_progress1)
     content_layout.addWidget(baixar_widget, alignment=Qt.AlignCenter)
 
     self.timer = QTimer(self)
