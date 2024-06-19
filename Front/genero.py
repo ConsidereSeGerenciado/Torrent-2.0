@@ -68,11 +68,6 @@ def initUI4(self,tipo):
     content_widget = QWidget()
     content_layout = QVBoxLayout(content_widget)
 
-    self.destaques_widget = QLabel("Destaque")
-    self.destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
-    content_layout.addWidget(self.destaques_widget)
-
     self.data_list = self.ListaAtualizada()
 
     self.itens_filtrados = []
@@ -80,29 +75,35 @@ def initUI4(self,tipo):
         if item['tipo_midia'] == tipo:
             self.itens_filtrados.append(item)
 
-    primeiro_item = self.itens_filtrados[0]  # Seleciona o primeiro item da lista filtrada
-    nome_selecionado = primeiro_item['nome']
+    if self.data_list != []:
+        self.destaques_widget = QLabel("Destaque")
+        self.destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
+        self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
+        content_layout.addWidget(self.destaques_widget)
+
+        primeiro_item = self.itens_filtrados[0]  # Seleciona o primeiro item da lista filtrada
+        nome_selecionado = primeiro_item['nome']
     
-    self.destaque_widget = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 600, 120)
-    self.destaque_widget.clicked.connect(lambda nome_selecionado=nome_selecionado, tipo=tipo: self.titulo_clicked(nome_selecionada,tipo))
-    self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
+        self.destaque_widget = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 600, 120)
+        self.destaque_widget.clicked.connect(lambda nome_selecionado=nome_selecionado, tipo=tipo: self.titulo_clicked(nome_selecionada,tipo))
+        self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
-    label_nome = QLabel(nome_selecionado)  
-    label_nome.setAlignment(Qt.AlignCenter)  
-    label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
-    label_nome.setFont(QFont("Lato", 22, QFont.Bold))
-    label_nome.setFixedSize(label_nome.sizeHint())
+        label_nome = QLabel(nome_selecionado)  
+        label_nome.setAlignment(Qt.AlignCenter)  
+        label_nome.setStyleSheet("color: white; border: 1px solid white; padding: 0px; background-color: transparent; border-radius: 10px;")
+        label_nome.setFont(QFont("Lato", 22, QFont.Bold))
+        label_nome.setFixedSize(label_nome.sizeHint())
 
-    self.destaque_widget.setLayout(QVBoxLayout())  
-    self.destaque_widget.layout().addWidget(label_nome, alignment= Qt.AlignBottom) 
+        self.destaque_widget.setLayout(QVBoxLayout())  
+        self.destaque_widget.layout().addWidget(label_nome, alignment= Qt.AlignBottom) 
 
-    content_layout.addWidget(self.destaque_widget, alignment=Qt.AlignCenter)
-    content_layout.addSpacing(10)
+        content_layout.addWidget(self.destaque_widget, alignment=Qt.AlignCenter)
+        content_layout.addSpacing(10)
 
-    self.populares_widget = QLabel("Populares")
-    self.populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    self.populares_widget.setStyleSheet("border: none; padding: 0px;")
-    content_layout.addWidget(self.populares_widget)
+        self.populares_widget = QLabel("Populares")
+        self.populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
+        self.populares_widget.setStyleSheet("border: none; padding: 0px;")
+        content_layout.addWidget(self.populares_widget)
     # Widget para conter os itens
     self.content_layout1 = QGridLayout()
 
@@ -110,7 +111,14 @@ def initUI4(self,tipo):
     self.content_layout1.setVerticalSpacing(20)    
     self.content_layout1.setContentsMargins(40,15,0,0)
 
-    self.home_layout(self.itens_filtrados)
+    if self.data_list != []:
+        self.home_layout(self.itens_filtrados)
+    else:
+        self.populares_widget = QLabel("Sem Dados De " + tipo)
+        self.populares_widget.setFont(QFont("Lato", 12, QFont.Bold))
+        self.populares_widget.setStyleSheet("border: none; padding: 0px;")
+        content_layout.addWidget(self.populares_widget)
+
 
     content_layout.addLayout(self.content_layout1)
     

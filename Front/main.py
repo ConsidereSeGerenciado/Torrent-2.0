@@ -257,7 +257,7 @@ class MainWindow(QMainWindow):
         with open(torrent_path, 'rb') as f:
             torrent_content = f.read()
 
-        tracker_url = 'http://localhost:6969/tracker'
+        tracker_url = 'http://18.191.81.105:6969/tracker'
         # Substitua 'sample_torrent_file_content' pelo conteúdo real do seu arquivo .torrent
         info_hash = hashlib.sha1(torrent_content).digest()
         peer_id = self.generate_peer_id()
@@ -266,6 +266,8 @@ class MainWindow(QMainWindow):
         downloaded = 0
         left = 0
         event = 'started'
+
+        print(peer_id)
 
         params = {
             'info_hash': info_hash,
@@ -306,7 +308,7 @@ class MainWindow(QMainWindow):
             print('Failed to connect to tracker:', response.status_code)
     
     def keep_alive(self, info_hash, peer_id):
-        tracker_url = 'http://localhost:6969/tracker/update'
+        tracker_url = 'http://18.191.81.105:6969/tracker/update'
         while True:
             time.sleep(1500)  # Espera por 1500 segundos (25 minutos) para garantir renovação antes de 1800 segundos
             params = {
@@ -327,7 +329,7 @@ class MainWindow(QMainWindow):
                 print('Failed to send keep-alive to tracker:', response.status_code)
         
     def get_all_torrents_info(self):
-        tracker_url = 'http://localhost:6969/tracker/torrents'
+        tracker_url = 'http://18.191.81.105:6969/tracker/torrents'
         global torrents_info
         
         try:
@@ -355,7 +357,7 @@ class MainWindow(QMainWindow):
         return torrents_info
     
     def download_peer(self, info_hash):
-        tracker_url = 'http://localhost:6969/tracker/download'
+        tracker_url = 'http://18.191.81.105:6969/tracker/download'
 
         params = {
             'info_hash': info_hash,

@@ -91,10 +91,10 @@ def initUI(self):
         content_layout.addWidget(self.destaque_widget, alignment=Qt.AlignCenter)
         content_layout.addSpacing(10)
 
-    self.populares_widget = QLabel("Populares")
-    self.populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
-    self.populares_widget.setStyleSheet("border: none; padding: 0px;")
-    content_layout.addWidget(self.populares_widget)
+        self.populares_widget = QLabel("Populares")
+        self.populares_widget.setFont(QFont("Lato", 20, QFont.Bold))
+        self.populares_widget.setStyleSheet("border: none; padding: 0px;")
+        content_layout.addWidget(self.populares_widget)
     # Widget para conter os itens
     self.content_layout1 = QGridLayout()
    
@@ -102,7 +102,16 @@ def initUI(self):
     self.content_layout1.setVerticalSpacing(20)    
     self.content_layout1.setContentsMargins(40,15,0,0)
 
-    self.home_layout(self.data_list)
+
+    
+    if self.data_list != []:
+        self.home_layout(self.data_list)
+    else:
+        self.populares_widget = QLabel("Sem dados")
+        self.populares_widget.setFont(QFont("Lato", 12, QFont.Bold))
+        self.populares_widget.setStyleSheet("border: none; padding: 0px;")
+        content_layout.addWidget(self.populares_widget)
+    
    
     # Definir o layout interno de content_widget como content_layout
     content_layout.addLayout(self.content_layout1)
