@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
     QScrollArea,QFileDialog,QSpacerItem, QDialogButtonBox, QDialog
 )
 from PySide6.QtGui import QPixmap, QIcon, QFont
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QTimer
 
 from Header import header
 from Menu import menu
@@ -186,8 +186,13 @@ class MainWindow(QMainWindow):
             self.button_widget.setEnabled(False)
 
     def on_upload_click(self):
+        # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
+        self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
+        # Temporizador para ele voltar para o fundo de cor original
+        QTimer.singleShot(200, lambda: self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: black"))
         self.collect_and_upload()
         self.start_progress()
+        
 
     dados = []
     def on_download_click(self, info_hash):
