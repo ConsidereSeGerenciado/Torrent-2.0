@@ -13,10 +13,11 @@ import string
 from torrentool.api import Torrent
 import time
 import threading
+from threading import Thread
 
 import socket
 import struct
-import urllib.parse
+
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
@@ -37,6 +38,33 @@ from titulo import initUI5
 from upload import initUI6
 
 CONFIG_FILE = '../Back/config.json'
+
+
+class BitTorrentClient(Thread):
+    def __init__(self, listen_ip, listen_port):
+        super().__init__()
+        self.listen_ip = listen_ip
+        self.listen_port = listen_port
+        self.server_socket = None
+
+    def run(self):
+        self.start_server()
+        self.accept_connections()
+
+    def start_server(self):
+        # Configurar o socket para ouvir conexões de entrada
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.listen_ip, self.listen_port))
+        self.server_socket.listen(5)
+        print(f"Servidor escutando em {self.listen_ip}:{self.listen_port}")
+
+    def accept_connections(self):
+        # Aceitar conexões de entrada
+        while True:
+            conn, addr = self.server_socket.accept()
+            print(f"Conexão aceita de {addr}")
+            # Aqui você pode processar a conexão, se necessário
+            conn.close()
     
 class ClickableImageLabel(QLabel):
     clicked = Signal()
@@ -613,30 +641,17 @@ class MainWindow(QMainWindow):
 if __name__ == '__main__':
 
     
-    HOST = ''   # Escuta em todas as interfaces disponíveis
-    PORT = 6881
+    listen_ip = '0.0.0.0'  # Ou seu IP público, se necessário
+    listen_port = 6881
 
-    # Cria um socket TCP/IP
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # Criar e iniciar o servidor BitTorrent em uma thread separada
 
-    # Tenta vincular o socket à porta
-    try:
-        sock.bind((HOST, PORT))
-        print(f"Porta {PORT} aberta e pronta para conexões.")
-        app = QApplication(sys.argv)
-        mainWindow = MainWindow()
-        mainWindow.show()
-        sys.exit(app.exec())
+    client = BitTorrentClient(listen_ip, listen_port)
+    client.start()
 
-    except OSError as e:
-        print(f"Erro ao abrir a porta {PORT}: {e}")
-
-    # Configura o socket para escutar conexões
-    sock.listen(5)  # Permite até 5 conexões pendentes
-
+ 
+    app = QApplication(sys.argv)
+    mainWindow = MainWindow()
+    mainWindow.show()
+    sys.exit(app.exec())
     # Aceita conexões vindas de clientes
-    while True:
-        conn, addr = sock.accept()
-        print(f"Conexão recebida de {addr}")
-        # Aqui você pode processar a conexão, se necessário
-        conn.close()
