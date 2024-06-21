@@ -40,31 +40,49 @@ from upload import initUI6
 CONFIG_FILE = '../Back/config.json'
 
 
-class BitTorrentClient(Thread):
-    def __init__(self, listen_ip, listen_port):
-        super().__init__()
-        self.listen_ip = listen_ip
-        self.listen_port = listen_port
-        self.server_socket = None
-
-    def run(self):
-        self.start_server()
-        self.accept_connections()
-
-    def start_server(self):
-        # Configurar o socket para ouvir conexões de entrada
+class P2PServer:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((self.listen_ip, self.listen_port))
-        self.server_socket.listen(5)
-        print(f"Servidor escutando em {self.listen_ip}:{self.listen_port}")
+        self.server_socket.bind((self.host, self.port))
+        self.peers = []  # Lista para armazenar informações dos peers conectados
+        self.running = False
 
-    def accept_connections(self):
-        # Aceitar conexões de entrada
+    def start(self):
+        self.running = True
+        self.server_socket.listen(5)  # Permitir até 5 conexões pendentes
+        print(f"Servidor P2P iniciado em {self.host}:{self.port}")
+
+        while self.running:
+            client_socket, client_address = self.server_socket.accept()
+            print(f"Conexão recebida de {client_address}")
+            self.peers.append((client_socket, client_address))
+
+            # Iniciar uma thread para lidar com a conexão do peer
+            threading.Thread(target=self.handle_peer_connection, args=(client_socket,)).start()
+
+    def handle_peer_connection(self, client_socket):
         while True:
-            conn, addr = self.server_socket.accept()
-            print(f"Conexão aceita de {addr}")
-            # Aqui você pode processar a conexão, se necessário
-            conn.close()
+            # Lógica para lidar com mensagens recebidas do peer
+            try:
+                data = client_socket.recv(1024)
+                if not data:
+                    break
+                # Processar os dados recebidos, se necessário
+            except Exception as e:
+                print(f"Erro ao receber dados do peer: {e}")
+                break
+
+        # Remover peer da lista quando a conexão é fechada
+        self.peers = [(sock, addr) for sock, addr in self.peers if sock != client_socket]
+        client_socket.close()
+
+    def stop(self):
+        self.running = False
+        self.server_socket.close()
+        print("Servidor P2P encerrado.")
+
     
 class ClickableImageLabel(QLabel):
     clicked = Signal()
@@ -640,16 +658,10 @@ class MainWindow(QMainWindow):
                     
 if __name__ == '__main__':
 
-    
-    listen_ip = '0.0.0.0'  # Ou seu IP público, se necessário
-    listen_port = 6881
+    server = P2PServer('0.0.0.0', 6881)  # Substitua pelo IP e porta desejados
+    server_thread = threading.Thread(target=server.start)
+    server_thread.start()
 
-    # Criar e iniciar o servidor BitTorrent em uma thread separada
-
-    client = BitTorrentClient(listen_ip, listen_port)
-    client.start()
-
- 
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()
