@@ -13,7 +13,11 @@ import string
 from torrentool.api import Torrent
 import time
 import threading
+from threading import Thread
+
 import socket
+import struct
+
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
@@ -34,6 +38,51 @@ from titulo import initUI5
 from upload import initUI6
 
 CONFIG_FILE = '../Back/config.json'
+
+
+class P2PServer:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.peers = []  # Lista para armazenar informações dos peers conectados
+        self.running = False
+
+    def start(self):
+        self.running = True
+        self.server_socket.listen(5)  # Permitir até 5 conexões pendentes
+        print(f"Servidor P2P iniciado em {self.host}:{self.port}")
+
+        while self.running:
+            client_socket, client_address = self.server_socket.accept()
+            print(f"Conexão recebida de {client_address}")
+            self.peers.append((client_socket, client_address))
+
+            # Iniciar uma thread para lidar com a conexão do peer
+            threading.Thread(target=self.handle_peer_connection, args=(client_socket,)).start()
+
+    def handle_peer_connection(self, client_socket):
+        while True:
+            # Lógica para lidar com mensagens recebidas do peer
+            try:
+                data = client_socket.recv(1024)
+                if not data:
+                    break
+                # Processar os dados recebidos, se necessário
+            except Exception as e:
+                print(f"Erro ao receber dados do peer: {e}")
+                break
+
+        # Remover peer da lista quando a conexão é fechada
+        self.peers = [(sock, addr) for sock, addr in self.peers if sock != client_socket]
+        client_socket.close()
+
+    def stop(self):
+        self.running = False
+        self.server_socket.close()
+        print("Servidor P2P encerrado.")
+
     
 class ClickableImageLabel(QLabel):
     clicked = Signal()
@@ -207,6 +256,10 @@ class MainWindow(QMainWindow):
 
     def start_progress1(self):
         global dados
+
+        for peer_info in dados:
+            self.connect_to_peer(peer_info['ip'], peer_info['port'], peer_info['info_hash'], peer_info['peer_id'])
+
         self.progress_value = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(self.progress_value)
@@ -271,8 +324,6 @@ class MainWindow(QMainWindow):
         downloaded = 0
         left = 0
         event = 'started'
-
-        print(peer_id)
 
         params = {
             'info_hash': info_hash,
@@ -540,9 +591,84 @@ class MainWindow(QMainWindow):
     def save_download_path(self, path):
         with open(CONFIG_FILE, 'w') as f:
             json.dump({'downloads_path': str(path)}, f) 
+    
+    def connect_to_peer(self, ip, port, info_hash, peer_id):
+        
+        # Decodificando info_hash para bytes
+        info_hash = requests.utils.unquote(info_hash)
+        print(info_hash)
+        # Criando socket TCP
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        try:
+            # Conectando ao peer
+            self.s.connect((ip, port))
+            print(f"Conectado ao peer {ip}:{port}")
+
+            # Enviando o handshake inicial
+            handshake = (
+                b"\x13"  # Length of protocol identifier (19 bytes)
+                b"BitTorrent protocol"  # Protocol identifier
+                b"\x00\x00\x00\x00\x00\x00\x00\x00"  # Reserved bytes
+                + self.info_hash  # Info hash
+                + bytes(peer_id, 'utf-8')  # Peer ID
+            )
+            self.send_message(handshake)
+
+            # Recebendo o handshake do peer
+            response = self.receive_message(68)  # O handshake tem 68 bytes fixos
+            print(f"Handshake recebido: {response}")
+
+            # Lógica para enviar e receber outras mensagens BitTorrent
+            # Exemplo: Enviar um keep-alive
+            self.send_message(struct.pack("!I", 0))  # Keep-alive tem comprimento 0
+
+            # Exemplo: Receber uma mensagem do peer
+            message_length_prefix = self.receive_message(4)
+            if len(message_length_prefix) == 4:
+                message_length = struct.unpack("!I", message_length_prefix)[0]
+                if message_length > 0:
+                    message = self.receive_message(message_length)
+                    print(f"Mensagem recebida: {message}")
+
+            # Exemplo: Enviar um bitfield (supondo que o peer não possui nenhuma parte)
+            bitfield = b"\x00\x00\x00\x01"  # Exemplo de bitfield indicando que possui a primeira parte (bit 0)
+            self.send_message(struct.pack("!IB", len(bitfield) + 1, 5) + bitfield)
+
+            # Exemplo: Receber um pedido (request) do peer
+            request_prefix = self.receive_message(5)
+            if len(request_prefix) == 5:
+                length, message_id = struct.unpack("!IB", request_prefix)
+                if message_id == 6:  # Código 6 para request
+                    index, begin, length = struct.unpack("!III", self.receive_message(12))
+                    print(f"Pedido recebido: index={index}, begin={begin}, length={length}")
+
+            # Exemplo: Enviar uma parte (piece) do arquivo ao peer
+            index = 0  # Índice da parte
+            begin = 0  # Início do bloco dentro da parte
+            block_data = b"..."  # Dados do bloco
+            self.send_message(struct.pack("!IBII", len(block_data) + 9, 7, index, begin) + block_data)
+
+        except ConnectionError as e:
+            print(f"Erro ao conectar ao peer: {e}")
+
+        finally:
+            self.s.close()  # Fechando o socket ao final da operação
+
+    def send_message(self, message):
+        self.s.send(message)
+
+    def receive_message(self, length):
+        return self.s.recv(length)
                     
 if __name__ == '__main__':
+
+    server = P2PServer('0.0.0.0', 6881)  # Substitua pelo IP e porta desejados
+    server_thread = threading.Thread(target=server.start)
+    server_thread.start()
+
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.show()
     sys.exit(app.exec())
+    # Aceita conexões vindas de clientes
