@@ -13,11 +13,9 @@ import string
 from torrentool.api import Torrent
 import time
 import threading
-from threading import Thread
-
-import socket
-import struct
-
+import base64
+import urllib.parse
+import subprocess
 
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
@@ -38,51 +36,6 @@ from titulo import initUI5
 from upload import initUI6
 
 CONFIG_FILE = '../Back/config.json'
-
-
-class P2PServer:
-    def __init__(self, host, port):
-        self.host = host
-        self.port = port
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((self.host, self.port))
-        self.peers = []  # Lista para armazenar informações dos peers conectados
-        self.running = False
-
-    def start(self):
-        self.running = True
-        self.server_socket.listen(5)  # Permitir até 5 conexões pendentes
-        print(f"Servidor P2P iniciado em {self.host}:{self.port}")
-
-        while self.running:
-            client_socket, client_address = self.server_socket.accept()
-            print(f"Conexão recebida de {client_address}")
-            self.peers.append((client_socket, client_address))
-
-            # Iniciar uma thread para lidar com a conexão do peer
-            threading.Thread(target=self.handle_peer_connection, args=(client_socket,)).start()
-
-    def handle_peer_connection(self, client_socket):
-        while True:
-            # Lógica para lidar com mensagens recebidas do peer
-            try:
-                data = client_socket.recv(1024)
-                if not data:
-                    break
-                # Processar os dados recebidos, se necessário
-            except Exception as e:
-                print(f"Erro ao receber dados do peer: {e}")
-                break
-
-        # Remover peer da lista quando a conexão é fechada
-        self.peers = [(sock, addr) for sock, addr in self.peers if sock != client_socket]
-        client_socket.close()
-
-    def stop(self):
-        self.running = False
-        self.server_socket.close()
-        print("Servidor P2P encerrado.")
-
     
 class ClickableImageLabel(QLabel):
     clicked = Signal()
@@ -252,9 +205,6 @@ class MainWindow(QMainWindow):
     def start_progress1(self):
         global dados
 
-        for peer_info in dados:
-            self.connect_to_peer(peer_info['ip'], peer_info['port'], peer_info['info_hash'], peer_info['peer_id'])
-
         self.progress_value = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(self.progress_value)
@@ -271,114 +221,104 @@ class MainWindow(QMainWindow):
         return ''.join(random.choices(string.ascii_letters + string.digits, k=size))
 
 
-    def create_torrent(self,input_path, output_dir, trackers=None):
-        try:
-            # Cria o objeto Torrent a partir do caminho de entrada
-            torrent = Torrent.create_from(input_path)
-            
-            # Obtém o nome do arquivo sem o caminho completo
-            file_name = os.path.basename(input_path)
-            
-            # Define o caminho completo para o arquivo .torrent
-            output_file = os.path.join(output_dir, f"{file_name}.torrent")
-            
-            # Salva o arquivo .torrent no diretório especificado
-            torrent.to_file(output_file)
-            
-            print(f"Arquivo .torrent criado em: {output_file}")
+    def create_torrent(self, input_path, output_dir, tracker_url, name=None, type=None, description=None):
+        torrent_data = {
+            'announce': tracker_url,
+            'info': {}
+        }
 
-            return output_file
-        except Exception as e:
-            print(f"Erro ao criar torrent: {e}")
-            raise  # Re-raise the exception to propagate it further
+        if os.path.isfile(input_path):
+            # Se for um arquivo único
+            torrent_data['info']['name'] = os.path.basename(input_path)
+            torrent_data['info']['length'] = os.path.getsize(input_path)
+            with open(input_path, 'rb') as f:
+                file_data = f.read()
+                torrent_data['info']['pieces'] = hashlib.sha1(file_data).digest()
+        elif os.path.isdir(input_path):
+            # Se for uma pasta
+            torrent_data['info']['name'] = os.path.basename(input_path)
+            torrent_data['info']['piece length'] = 256 * 1024  # 256 KB por pedaço (piece)
+            torrent_data['info']['pieces'] = b''
+
+            # Calcular hash SHA-1 de cada arquivo na pasta e montar a estrutura 'files'
+            for root, _, files in os.walk(input_path):
+                for file_name in files:
+                    file_path = os.path.join(root, file_name)
+                    relative_path = os.path.relpath(file_path, input_path)
+                    file_size = os.path.getsize(file_path)
+
+                    with open(file_path, 'rb') as f:
+                        file_data = f.read()
+                        file_info = {
+                            'length': file_size,
+                            'path': relative_path.split(os.path.sep),
+                            'sha1': hashlib.sha1(file_data).digest()
+                        }
+                        torrent_data['info'].setdefault('files', []).append(file_info)
+
+                        # Adicionar hash SHA-1 do arquivo ao campo 'pieces'
+                        torrent_data['info']['pieces'] += hashlib.sha1(file_data).digest()
+
+        else:
+            raise ValueError("O caminho especificado não é válido.")
+
+        # Adicionar nome, tipo e descrição ao torrent_data
+        if name:
+            torrent_data['info']['name'] = name
+        if type:
+            torrent_data['info']['type'] = type
+        if description:
+            torrent_data['info']['description'] = description
+
+        # Diretório de saída para salvar o arquivo .torrent
+        if output_dir:
+            os.makedirs(output_dir, exist_ok=True)
+            torrent_file_path = os.path.join(output_dir, f'{os.path.basename(input_path)}.torrent')
+        else:
+            torrent_file_path = f'{os.path.basename(input_path)}.torrent'
+
+        # Salvando o arquivo torrent
+        with open(torrent_file_path, 'wb') as f:
+            f.write(bencodepy.encode(torrent_data))
+
+        return torrent_file_path
+
+    def create_magnet_link(self, torrent_file):
+        # Leitura do arquivo torrent
+        with open(torrent_file, 'rb') as f:
+            torrent_data = f.read()
+
+        # Decodificação do arquivo torrent
+        metadata = bencodepy.decode(torrent_data)
+
+        # Calculando o hash SHA-1 do info_hash
+        info_hash = hashlib.sha1(bencodepy.encode(metadata[b'info'])).digest()
+
+        # Codificando o hash SHA-1 em Base32
+        base32_info_hash = base64.b32encode(info_hash).decode().replace('=', '')
+
+        # Construindo o link magnético
+        magnet_link = f'magnet:?xt=urn:btih:{base32_info_hash}'
+
+        # Adicionando o tracker URL ao link magnético, se disponível
+        if b'announce' in metadata:
+            tracker_url = urllib.parse.quote(metadata[b'announce'].decode())
+            magnet_link += f'&tr={tracker_url}'
+        
+        return magnet_link
     
     def collect_and_upload(self):
-        nome = self.nome_widget1.text()
+        downloads_path = self.load_download_path()
         diretorio_arquivo = self.directory_edit_arquivo.text()
+        nome = self.nome_widget1.text()
         tipo_midia = self.midia_widget1.currentText()
         descricao = self.descricao_widget1.toPlainText()
 
-        downloads_path = self.load_download_path()
-        Ctorrent = self.create_torrent(str(diretorio_arquivo), downloads_path)
-        self.upload_arquivos(nome, Ctorrent, tipo_midia, descricao)
+        Ctorrent = self.create_torrent(str(diretorio_arquivo), downloads_path, 'http://18.191.81.105:6969/announce',
+                                    name=nome, type=tipo_midia, description=descricao)
+        link = self.create_magnet_link(Ctorrent)
+        print(link)
 
-    def upload_arquivos(self, nome, torrent_path, tipo_midia, descricao):
-        # Se a descrição estiver vazia, define como "Sem descrição"
-        if not descricao:
-            descricao = "Sem descrição"
-
-        with open(torrent_path, 'rb') as f:
-            torrent_content = f.read()
-
-        tracker_url = 'http://18.191.81.105:6969/tracker'
-        # Substitua 'sample_torrent_file_content' pelo conteúdo real do seu arquivo .torrent
-        info_hash = hashlib.sha1(torrent_content).digest()
-        peer_id = self.generate_peer_id()
-        port = 6881
-        uploaded = 0
-        downloaded = 0
-        left = 0
-        event = 'started'
-
-        params = {
-            'info_hash': info_hash,
-            'nome': nome,
-            'tipo_midia': tipo_midia,
-            'descricao': descricao,
-            'peer_id': peer_id,
-            'port': port,
-            'uploaded': uploaded,
-            'downloaded': downloaded,
-            'left': left,
-            'event': event
-        }
-
-        # Converte info_hash e peer_id para formato adequado (URL encoded)
-        encoded_params = {
-            'info_hash': requests.utils.quote(info_hash),
-            'nome': nome,
-            'tipo_midia': tipo_midia,
-            'descricao': descricao,
-            'peer_id': peer_id,
-            'port': port,
-            'uploaded': uploaded,
-            'downloaded': downloaded,
-            'left': left,
-            'event': event
-        }
-
-        response = requests.get(tracker_url, params=encoded_params)
-        
-        if response.status_code == 200:
-            response_data = bencodepy.decode(response.content)
-            print('Response from tracker:', response_data)
-
-            info_hash = encoded_params['info_hash']
-            threading.Thread(target=self.keep_alive, args=(info_hash, peer_id)).start()
-        else:
-            print('Failed to connect to tracker:', response.status_code)
-    
-    def keep_alive(self, info_hash, peer_id):
-        tracker_url = 'http://18.191.81.105:6969/tracker/update'
-        while True:
-            time.sleep(1500)  # Espera por 1500 segundos (25 minutos) para garantir renovação antes de 1800 segundos
-            params = {
-                'info_hash': info_hash,
-                'peer_id': peer_id,
-                'port': 6881,
-                'uploaded': 0,
-                'downloaded': 0,
-                'left': 0,
-                'event': 'keep-alive'
-            }
-
-            response = requests.get(tracker_url, params=params)
-
-            if response.status_code == 200:
-                print('Keep-alive response from tracker:', response.content)
-            else:
-                print('Failed to send keep-alive to tracker:', response.status_code)
-        
     def get_all_torrents_info(self):
         tracker_url = 'http://18.191.81.105:6969/tracker/torrents'
         global torrents_info
@@ -587,80 +527,7 @@ class MainWindow(QMainWindow):
         with open(CONFIG_FILE, 'w') as f:
             json.dump({'downloads_path': str(path)}, f) 
     
-    def connect_to_peer(self, ip, port, info_hash, peer_id):
-        
-        # Decodificando info_hash para bytes
-        info_hash = requests.utils.unquote(info_hash)
-        print(info_hash)
-        # Criando socket TCP
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        try:
-            # Conectando ao peer
-            self.s.connect((ip, port))
-            print(f"Conectado ao peer {ip}:{port}")
-
-            # Enviando o handshake inicial
-            handshake = (
-                b"\x13"  # Length of protocol identifier (19 bytes)
-                b"BitTorrent protocol"  # Protocol identifier
-                b"\x00\x00\x00\x00\x00\x00\x00\x00"  # Reserved bytes
-                + self.info_hash  # Info hash
-                + bytes(peer_id, 'utf-8')  # Peer ID
-            )
-            self.send_message(handshake)
-
-            # Recebendo o handshake do peer
-            response = self.receive_message(68)  # O handshake tem 68 bytes fixos
-            print(f"Handshake recebido: {response}")
-
-            # Lógica para enviar e receber outras mensagens BitTorrent
-            # Exemplo: Enviar um keep-alive
-            self.send_message(struct.pack("!I", 0))  # Keep-alive tem comprimento 0
-
-            # Exemplo: Receber uma mensagem do peer
-            message_length_prefix = self.receive_message(4)
-            if len(message_length_prefix) == 4:
-                message_length = struct.unpack("!I", message_length_prefix)[0]
-                if message_length > 0:
-                    message = self.receive_message(message_length)
-                    print(f"Mensagem recebida: {message}")
-
-            # Exemplo: Enviar um bitfield (supondo que o peer não possui nenhuma parte)
-            bitfield = b"\x00\x00\x00\x01"  # Exemplo de bitfield indicando que possui a primeira parte (bit 0)
-            self.send_message(struct.pack("!IB", len(bitfield) + 1, 5) + bitfield)
-
-            # Exemplo: Receber um pedido (request) do peer
-            request_prefix = self.receive_message(5)
-            if len(request_prefix) == 5:
-                length, message_id = struct.unpack("!IB", request_prefix)
-                if message_id == 6:  # Código 6 para request
-                    index, begin, length = struct.unpack("!III", self.receive_message(12))
-                    print(f"Pedido recebido: index={index}, begin={begin}, length={length}")
-
-            # Exemplo: Enviar uma parte (piece) do arquivo ao peer
-            index = 0  # Índice da parte
-            begin = 0  # Início do bloco dentro da parte
-            block_data = b"..."  # Dados do bloco
-            self.send_message(struct.pack("!IBII", len(block_data) + 9, 7, index, begin) + block_data)
-
-        except ConnectionError as e:
-            print(f"Erro ao conectar ao peer: {e}")
-
-        finally:
-            self.s.close()  # Fechando o socket ao final da operação
-
-    def send_message(self, message):
-        self.s.send(message)
-
-    def receive_message(self, length):
-        return self.s.recv(length)
-                    
 if __name__ == '__main__':
-
-    server = P2PServer('0.0.0.0', 6881)  # Substitua pelo IP e porta desejados
-    server_thread = threading.Thread(target=server.start)
-    server_thread.start()
 
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
