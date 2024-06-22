@@ -62,8 +62,9 @@ def initUI5(self,name,tipo):
     content_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
     descricao = self.descricaoSearch(name,tipo)
-    info_hash = self.hashSearch(name,tipo)
-    self.on_download_click(info_hash)
+    self.link_magnetico = self.linkSearch(name,tipo)
+
+    print(self.link_magnetico)
 
     logo_widget = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 600, 120)
     logo_widget.setStyleSheet("border:2px solid white; padding: 0px;")

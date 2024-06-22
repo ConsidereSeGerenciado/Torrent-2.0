@@ -8,8 +8,6 @@ from unidecode import unidecode
 import requests
 import bencodepy
 import hashlib
-import random
-import string
 from torrentool.api import Torrent
 import time
 import threading
@@ -191,10 +189,6 @@ class MainWindow(QMainWindow):
         self.collect_and_upload()
         self.start_progress()
 
-    dados = []
-    def on_download_click(self, info_hash):
-        global dados  
-        dados = self.download_peer(info_hash)
 
     def start_progress(self):
         self.progress_value = 0
@@ -203,8 +197,8 @@ class MainWindow(QMainWindow):
         self.timer.start(100)      
 
     def start_progress1(self):
-        global dados
-
+        print('teste ' + self.link_magnetico)
+        self.start_download(self.link_magnetico)
         self.progress_value = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(self.progress_value)
@@ -216,49 +210,37 @@ class MainWindow(QMainWindow):
         if self.progress_value >= 100:
             self.timer.stop()
 
-    def generate_peer_id(self, size=20):
-        # Gera um identificador de peer único com 20 caracteres aleatórios
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=size))
-
-
     def create_torrent(self, input_path, output_dir, tracker_url, name=None, type=None, description=None):
         torrent_data = {
             'announce': tracker_url,
-            'info': {}
+            'info': {
+                'piece length': 256 * 1024  # 256 KB por pedaço (piece)
+            }
         }
 
         if os.path.isfile(input_path):
             # Se for um arquivo único
             torrent_data['info']['name'] = os.path.basename(input_path)
             torrent_data['info']['length'] = os.path.getsize(input_path)
-            with open(input_path, 'rb') as f:
-                file_data = f.read()
-                torrent_data['info']['pieces'] = hashlib.sha1(file_data).digest()
+            torrent_data['info']['pieces'] = self.calculate_pieces(input_path, torrent_data['info']['piece length'])
         elif os.path.isdir(input_path):
             # Se for uma pasta
             torrent_data['info']['name'] = os.path.basename(input_path)
-            torrent_data['info']['piece length'] = 256 * 1024  # 256 KB por pedaço (piece)
+            torrent_data['info']['files'] = []
             torrent_data['info']['pieces'] = b''
 
-            # Calcular hash SHA-1 de cada arquivo na pasta e montar a estrutura 'files'
+            # Calcular hash SHA-1 de cada pedaço de arquivo na pasta
             for root, _, files in os.walk(input_path):
                 for file_name in files:
                     file_path = os.path.join(root, file_name)
                     relative_path = os.path.relpath(file_path, input_path)
                     file_size = os.path.getsize(file_path)
 
-                    with open(file_path, 'rb') as f:
-                        file_data = f.read()
-                        file_info = {
-                            'length': file_size,
-                            'path': relative_path.split(os.path.sep),
-                            'sha1': hashlib.sha1(file_data).digest()
-                        }
-                        torrent_data['info'].setdefault('files', []).append(file_info)
-
-                        # Adicionar hash SHA-1 do arquivo ao campo 'pieces'
-                        torrent_data['info']['pieces'] += hashlib.sha1(file_data).digest()
-
+                    torrent_data['info']['files'].append({
+                        'length': file_size,
+                        'path': relative_path.split(os.path.sep)
+                    })
+                    torrent_data['info']['pieces'] += self.calculate_pieces(file_path, torrent_data['info']['piece length'])
         else:
             raise ValueError("O caminho especificado não é válido.")
 
@@ -283,6 +265,16 @@ class MainWindow(QMainWindow):
 
         return torrent_file_path
 
+    def calculate_pieces(self, file_path, piece_length):
+        pieces = b''
+        with open(file_path, 'rb') as f:
+            while True:
+                piece = f.read(piece_length)
+                if not piece:
+                    break
+                pieces += hashlib.sha1(piece).digest()
+        return pieces
+
     def create_magnet_link(self, torrent_file):
         # Leitura do arquivo torrent
         with open(torrent_file, 'rb') as f:
@@ -295,7 +287,7 @@ class MainWindow(QMainWindow):
         info_hash = hashlib.sha1(bencodepy.encode(metadata[b'info'])).digest()
 
         # Codificando o hash SHA-1 em Base32
-        base32_info_hash = base64.b32encode(info_hash).decode().replace('=', '')
+        base32_info_hash = base64.b32encode(info_hash).decode().strip('=')
 
         # Construindo o link magnético
         magnet_link = f'magnet:?xt=urn:btih:{base32_info_hash}'
@@ -306,21 +298,73 @@ class MainWindow(QMainWindow):
             magnet_link += f'&tr={tracker_url}'
         
         return magnet_link
-    
+
     def collect_and_upload(self):
-        downloads_path = self.load_download_path()
-        diretorio_arquivo = self.directory_edit_arquivo.text()
+        downloads_path = self.load_download_path()  # Função para carregar o caminho de downloads
+        diretorio_arquivo = self.directory_edit_arquivo.text()  # Supondo que esses métodos são do PyQt ou similar
         nome = self.nome_widget1.text()
         tipo_midia = self.midia_widget1.currentText()
         descricao = self.descricao_widget1.toPlainText()
 
-        Ctorrent = self.create_torrent(str(diretorio_arquivo), downloads_path, 'http://18.191.81.105:6969/announce',
-                                    name=nome, type=tipo_midia, description=descricao)
-        link = self.create_magnet_link(Ctorrent)
-        print(link)
+        if not descricao:
+            descricao = "Sem descrição"
 
+        # Criar o arquivo torrent
+        torrent_file = self.create_torrent(str(diretorio_arquivo), downloads_path, 'http://18.191.81.105:6969/tracker',
+                                           name=nome, type=tipo_midia, description=descricao)
+        # Gerar e imprimir o link magnético
+        magnet_link = self.create_magnet_link(torrent_file)
+        print("Link Magnético:", magnet_link)
+        self.start_seed(magnet_link)
+        self.upload_infos(nome,tipo_midia,descricao,magnet_link)
+    
+    def upload_infos(self, nome, tipo_midia,descricao,magnet_link):
+
+        params = {
+            'nome': nome,
+            'tipo_midia': tipo_midia,
+            'descricao': descricao,
+            'link_magnetico': magnet_link
+        }
+
+        try:
+            response = requests.get('http://18.191.81.105:6969/dados', params=params)
+            if response.status_code == 200:
+                print("Sucesso", "Dados enviados com sucesso!")
+            else:
+                print("Erro", f"Falha ao enviar dados: {response.text}")
+        except Exception as e:
+            print("Erro", f"Ocorreu um erro: {e}")
+
+
+    def start_download(self, magnet_link):
+        save_path = self.load_download_path()  # Supondo que load_download_path retorna o diretório correto
+        command = [
+            'aria2c', 
+            '--seed-time=0', 
+            '--enable-dht', 
+            '--dir=' +  str(save_path), 
+            magnet_link
+        ]
+        subprocess.run(command)
+    
+    def start_seed(self, torrent_file):
+        print(torrent_file)
+        save_path = self.load_download_path()  # Supondo que load_download_path retorna o diretório correto
+        # Comando para iniciar o seeding com aria2c
+        command = [
+            'aria2c', 
+            '--seed-time=0', 
+            '--enable-dht', 
+            '--dir=' + str(save_path), 
+            torrent_file
+        ]
+        subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"Started seeding {torrent_file}")
+
+    
     def get_all_torrents_info(self):
-        tracker_url = 'http://18.191.81.105:6969/tracker/torrents'
+        tracker_url = 'http://18.191.81.105:6969/dados/torrents'
         global torrents_info
         
         try:
@@ -347,26 +391,6 @@ class MainWindow(QMainWindow):
         global torrents_info
         return torrents_info
     
-    def download_peer(self, info_hash):
-        tracker_url = 'http://18.191.81.105:6969/tracker/download'
-
-        params = {
-            'info_hash': info_hash,
-        }
-
-        response = requests.get(tracker_url, params=params)
-        response.raise_for_status() 
-        decoded_data = bencodepy.decode(response.content)
-
-        torrents_info = [
-            {
-                key.decode(): value.decode() if isinstance(value, bytes) else value
-                for key, value in item.items()
-            }
-            for item in decoded_data
-            ]
-        print(torrents_info)
-        return torrents_info
 
     def openFileDialog(self):
        # Criação do diálogo para seleção de arquivos
@@ -504,11 +528,11 @@ class MainWindow(QMainWindow):
             if item['nome'] == name and item['tipo_midia'] == tipo:
                 return item['descricao']
     
-    def hashSearch(self,name,tipo):
+    def linkSearch(self, name, tipo):
         data_list = self.ListaAtualizada()
         for item in data_list:
             if item['nome'] == name and item['tipo_midia'] == tipo:
-                return item['info_hash']
+                return item['link_magnetico']
         
     
     def load_download_path(self):
