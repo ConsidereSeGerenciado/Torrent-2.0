@@ -319,7 +319,6 @@ class MainWindow(QMainWindow):
                                            name=nome, type=tipo_midia, description=descricao)
         # Gerar e imprimir o link magnético
         magnet_link = self.create_magnet_link(torrent_file)
-        
         print("Link Magnético:", magnet_link)
         self.start_seed(magnet_link)
         self.upload_infos(nome,tipo_midia,descricao,magnet_link)
@@ -500,7 +499,7 @@ class MainWindow(QMainWindow):
         if texto_busca == "":
             filtered_items = self.items
         else:
-            filtered_items = [item for item in self.items if texto_busca in item[0].lower()]
+            filtered_items = [item for item in self.data_list if texto_busca.lower() in item['nome'].lower()]
         
         self.populate_layout(filtered_items)
 
@@ -524,7 +523,8 @@ class MainWindow(QMainWindow):
             self.destaque_widget.setVisible(True)
             self.populares_widget.setVisible(True)
         else:
-            filtered_items = [item for item in self.data_list if texto_busca in item[0].lower()]   
+            filtered_items = [item for item in self.data_list if texto_busca.lower() in item['nome'].lower()]
+
             self.destaques_widget.setVisible(False)
             self.destaque_widget.setVisible(False)
             self.populares_widget.setVisible(False)
