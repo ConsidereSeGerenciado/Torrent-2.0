@@ -73,23 +73,23 @@ def initUI3(self):
     self.line_download.setFont(QFont("Lato", 10, QFont.Bold))
     content_layout1.addWidget(self.line_download)
 
-    button_selecionar = QPushButton("Selecionar")
-    button_selecionar.setFont(QFont("Lato", 10))  # Definindo tamanho do botão
-    button_selecionar.setFixedWidth(100)
-    button_selecionar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
-    button_selecionar.clicked.connect(self.OpenFileA)
-    content_layout1.addWidget(button_selecionar)
+    self.button_selecionar = QPushButton("Selecionar")
+    self.button_selecionar.setFont(QFont("Lato", 10))  # Definindo tamanho do botão
+    self.button_selecionar.setFixedWidth(100)
+    self.button_selecionar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
+    self.button_selecionar.clicked.connect(self.OpenFileA)
+    content_layout1.addWidget(self.button_selecionar)
 
     content_layout.addLayout(content_layout1)
     content_layout.addSpacing(20)
 
-    button_salvar = QPushButton("Salvar")
-    button_salvar.setFont(QFont("Lato", 10))
-    button_salvar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
-    button_salvar.clicked.connect(lambda: self.save_download_path(Path(self.line_download.text())))
+    self.button_salvar = QPushButton("Salvar")
+    self.button_salvar.setFont(QFont("Lato", 10))
+    self.button_salvar.setStyleSheet("color: white; background-color: black; border: 2px solid white")
+    self.button_salvar.clicked.connect(lambda: self.save_download_path(Path(self.line_download.text())))
 
-    button_salvar.setFixedSize(100,40)
-    content_layout.addWidget(button_salvar, alignment= Qt.AlignCenter)
+    self.button_salvar.setFixedSize(100,40)
+    content_layout.addWidget(self.button_salvar, alignment= Qt.AlignCenter)
 
     content_layout.addStretch()
 

@@ -189,12 +189,10 @@ class MainWindow(QMainWindow):
         # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
         self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
         # Temporizador para ele voltar para o fundo de cor original
-        QTimer.singleShot(200, lambda: self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: black"))
+        QTimer.singleShot(200, lambda: self.button_widget.setStyleSheet(
+            "border: 2px solid white; padding: 0px; background-color: black"))
         self.collect_and_upload()
         self.start_progress()
-        
-
-
     def start_progress(self):
         self.progress_value = 0
         self.progress_bar.setVisible(True)
@@ -428,6 +426,11 @@ class MainWindow(QMainWindow):
 
 
     def OpenFileA(self):
+        # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
+        self.button_selecionar.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
+        # Temporizador para ele voltar para o fundo de cor original
+        QTimer.singleShot(600, lambda: self.button_selecionar.setStyleSheet(
+            "border: 2px solid white; padding: 0px; background-color: black"))
         folder = QFileDialog.getExistingDirectory(self, 'Selecionar Pasta', str(Path.home()))
         if folder:
             downloads_path = Path(folder)
@@ -558,6 +561,11 @@ class MainWindow(QMainWindow):
             return downloads_path
     
     def save_download_path(self, path):
+        # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
+        self.button_salvar.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
+        # Temporizador para ele voltar para o fundo de cor original
+        QTimer.singleShot(200, lambda: self.button_salvar.setStyleSheet(
+            "border: 2px solid white; padding: 0px; background-color: black"))
         with open(CONFIG_FILE, 'w') as f:
             json.dump({'downloads_path': str(path)}, f) 
     
