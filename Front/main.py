@@ -343,7 +343,9 @@ class MainWindow(QMainWindow):
             'aria2c', 
             '--seed-time=0', 
             '--enable-dht', 
-            '--dir=' +  str(save_path), 
+            '--dht-listen-port=6881', 
+            '--listen-port=6881',
+            '--dir=' + str(save_path), 
             magnet_link
         ]
         subprocess.run(command)
@@ -355,7 +357,9 @@ class MainWindow(QMainWindow):
         command = [
             'aria2c', 
             '--seed-time=0', 
-            '--enable-dht', 
+            '--enable-dht',
+            '--dht-listen-port=6881', 
+            '--listen-port=6881',
             '--dir=' + str(save_path), 
             torrent_file
         ]
