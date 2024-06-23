@@ -75,7 +75,7 @@ def initUI4(self,tipo):
         if item['tipo_midia'] == tipo:
             self.itens_filtrados.append(item)
 
-    if self.data_list != []:
+    if self.itens_filtrados != []:
         self.destaques_widget = QLabel("Destaque")
         self.destaques_widget.setFont(QFont("Lato", 20, QFont.Bold))
         self.destaques_widget.setStyleSheet("border: none; padding: 0px;")
@@ -85,7 +85,7 @@ def initUI4(self,tipo):
         nome_selecionado = primeiro_item['nome']
     
         self.destaque_widget = ClickableImageLabel(QPixmap('Imagens/cinza.png'), 600, 120)
-        self.destaque_widget.clicked.connect(lambda nome_selecionado=nome_selecionado, tipo=tipo: self.titulo_clicked(nome_selecionada,tipo))
+        self.destaque_widget.clicked.connect(lambda nome_selecionado=nome_selecionado, tipo=tipo: self.titulo_clicked(nome_selecionado,tipo))
         self.destaque_widget.setStyleSheet("border:2px solid white; padding: 0px;")
 
         label_nome = QLabel(nome_selecionado)  
