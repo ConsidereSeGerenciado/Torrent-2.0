@@ -314,6 +314,7 @@ class MainWindow(QMainWindow):
                                            name=nome, type=tipo_midia, description=descricao)
         # Gerar e imprimir o link magnético
         magnet_link = self.create_magnet_link(torrent_file)
+        
         print("Link Magnético:", magnet_link)
         self.start_seed(magnet_link)
         self.upload_infos(nome,tipo_midia,descricao,magnet_link)
