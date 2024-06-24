@@ -19,8 +19,13 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout,QLabel, 
     QPushButton, QWidget,QFileDialog, QDialogButtonBox
 )
+<<<<<<< HEAD
 from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtCore import Qt, Signal
+=======
+from PySide6.QtGui import QPixmap, QIcon, QFont
+from PySide6.QtCore import Qt, Signal, QTimer
+>>>>>>> origin
 
 from Header import header
 from Menu import menu
@@ -193,10 +198,18 @@ class MainWindow(QMainWindow):
 
     #Chama a função para fazer upload na nuvem e depois chama um carregamento(apenas visual)
     def on_upload_click(self):
+        # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
+        self.button_widget.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
+        # Temporizador para ele voltar para o fundo de cor original
+        QTimer.singleShot(200, lambda: self.button_widget.setStyleSheet(
+            "border: 2px solid white; padding: 0px; background-color: black"))
         self.collect_and_upload()
         self.start_progress()
+<<<<<<< HEAD
 
     #Começa o carregamento
+=======
+>>>>>>> origin
     def start_progress(self):
         self.progress_value = 0
         self.progress_bar.setVisible(True)
@@ -442,6 +455,11 @@ class MainWindow(QMainWindow):
 
     #Função para escolher o diretorio onde vai ser feito os download essa opção fica nas configs
     def OpenFileA(self):
+        # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
+        self.button_selecionar.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
+        # Temporizador para ele voltar para o fundo de cor original
+        QTimer.singleShot(600, lambda: self.button_selecionar.setStyleSheet(
+            "border: 2px solid white; padding: 0px; background-color: black"))
         folder = QFileDialog.getExistingDirectory(self, 'Selecionar Pasta', str(Path.home()))
         if folder:
             downloads_path = Path(folder)
@@ -577,6 +595,11 @@ class MainWindow(QMainWindow):
     
     #Salva a pasta escolhida pode ser a padrão ou a que configuramos no config
     def save_download_path(self, path):
+        # Assim q clica no botão, eu mudo a cor para uma nova para simular o efeito de um click
+        self.button_salvar.setStyleSheet("border: 2px solid white; padding: 0px; background-color: lightgray")
+        # Temporizador para ele voltar para o fundo de cor original
+        QTimer.singleShot(200, lambda: self.button_salvar.setStyleSheet(
+            "border: 2px solid white; padding: 0px; background-color: black"))
         with open(CONFIG_FILE, 'w') as f:
             json.dump({'downloads_path': str(path)}, f) 
     
