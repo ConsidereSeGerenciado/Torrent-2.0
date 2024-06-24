@@ -16,11 +16,10 @@ import urllib.parse
 import subprocess
 
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QWidget, QSizePolicy, QLineEdit,
-    QScrollArea,QFileDialog,QSpacerItem, QDialogButtonBox, QDialog
+    QApplication, QMainWindow, QVBoxLayout,QLabel, 
+    QPushButton, QWidget,QFileDialog, QDialogButtonBox
 )
-from PySide6.QtGui import QPixmap, QIcon, QFont
+from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtCore import Qt, Signal
 
 from Header import header
@@ -59,8 +58,10 @@ class MainWindow(QMainWindow):
         self.setGeometry(100, 100, 800, 600)
         self.setWindowFlag(Qt.FramelessWindowHint)
 
+        #Pegar todos dados do banco de dados
         self.get_all_torrents_info()
 
+        #interface inicial
         self.content_header = header(self)
         self.content_menu = menu(self)
         self.content_pesquisa_layout = initUI(self)
@@ -80,14 +81,15 @@ class MainWindow(QMainWindow):
     def quadrado_clicked(self):
         print("quadrado clicked")
         if self.isFullScreen():
-            self.showNormal()  # Se já estiver em fullscreen, voltar ao tamanho normal
+            self.showNormal()  
         else:
-            self.showFullScreen()  # Caso contrário, ativar o fullscreen
+            self.showFullScreen()
 
     def fechar_clicked(self):
         print("fecha clicked")
         self.close()
 
+    #Ações de clicar nas opções clicaveis
     def home_clicked(self):
         global i
         i= 0
@@ -135,6 +137,7 @@ class MainWindow(QMainWindow):
         print("titulo clicked")
         self.update_interface(name,tipo)
 
+    #Com o click atualiza a interface para a opção desejada
     def update_interface(self,name=None,tipo=None):
         global i
         # Limpar o layout do content_pesquisa_layout
@@ -143,6 +146,7 @@ class MainWindow(QMainWindow):
             if item.widget():
                 item.widget().deleteLater()
 
+        # Troca de telas
         if i == 1:
             new_layout = initUI1(self)
         elif i == 0:
@@ -160,6 +164,7 @@ class MainWindow(QMainWindow):
 
         self.content_pesquisa_layout.addLayout(new_layout)
 
+    #aplica efeio de click no botão
     def on_enter(self, button):
         button.setStyleSheet("""
             background-color: gray;
@@ -174,6 +179,7 @@ class MainWindow(QMainWindow):
             padding: 0px;
         """)
 
+    #Usado na função upload para liberar o botão apenas quando nome, arquivo e tipo forem preenchidos
     def check_fields(self):
         nome_filled = bool(self.nome_widget1.text().strip())
         arquivo_filled = bool(self.directory_edit_arquivo.text().strip())
@@ -185,17 +191,19 @@ class MainWindow(QMainWindow):
         else:
             self.button_widget.setEnabled(False)
 
+    #Chama a função para fazer upload na nuvem e depois chama um carregamento(apenas visual)
     def on_upload_click(self):
         self.collect_and_upload()
         self.start_progress()
 
-
+    #Começa o carregamento
     def start_progress(self):
         self.progress_value = 0
         self.progress_bar.setVisible(True)
         self.progress_bar.setValue(self.progress_value)
         self.timer.start(100)      
 
+    #carregamento do download (apenas visual tambem)
     def start_progress1(self):
         print('teste ' + self.link_magnetico)
         self.start_download(self.link_magnetico)
@@ -204,12 +212,14 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(self.progress_value)
         self.timer.start(100)  # Define o intervalo de atualização em milissegundos
 
+    #Contaviliza o carregamento (apenas visual)
     def update_progress(self):
         self.progress_value += 1
         self.progress_bar.setValue(self.progress_value)
         if self.progress_value >= 100:
             self.timer.stop()
 
+    #Função responsavel por tranformar o arquivo escolhido no upload em um .torrent contendo metadados importantes do arquivo
     def create_torrent(self, input_path, output_dir, tracker_url, name=None, type=None, description=None):
         torrent_data = {
             'announce': tracker_url,
@@ -265,6 +275,7 @@ class MainWindow(QMainWindow):
 
         return torrent_file_path
 
+    #Função que calcula o Tamanho da piece
     def calculate_pieces(self, file_path, piece_length):
         pieces = b''
         with open(file_path, 'rb') as f:
@@ -275,6 +286,7 @@ class MainWindow(QMainWindow):
                 pieces += hashlib.sha1(piece).digest()
         return pieces
 
+    #Função que vai pegar nosso .torrent e transformar ele num link magnetico
     def create_magnet_link(self, torrent_file):
         # Leitura do arquivo torrent
         with open(torrent_file, 'rb') as f:
@@ -299,6 +311,8 @@ class MainWindow(QMainWindow):
         
         return magnet_link
 
+    #Função responsavel por pegar os dados digitados no upload e mandar pro .torrent e tambem chamar as outras funções de gerar link
+    #magnetico e começar a seedar o arquivo
     def collect_and_upload(self):
         downloads_path = self.load_download_path()  # Função para carregar o caminho de downloads
         diretorio_arquivo = self.directory_edit_arquivo.text()  # Supondo que esses métodos são do PyQt ou similar
@@ -318,6 +332,7 @@ class MainWindow(QMainWindow):
         self.start_seed(magnet_link)
         self.upload_infos(nome,tipo_midia,descricao,magnet_link)
     
+    #Função que vai ser responsavel por fazer o upload das infos para o banco de dados
     def upload_infos(self, nome, tipo_midia,descricao,magnet_link):
 
         params = {
@@ -336,7 +351,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print("Erro", f"Ocorreu um erro: {e}")
 
-
+    #Função responsavel por  iniciar o download quando clicar no baixar no item escolhido
     def start_download(self, magnet_link):
         save_path = self.load_download_path()  # Supondo que load_download_path retorna o diretório correto
         command = [
@@ -350,6 +365,7 @@ class MainWindow(QMainWindow):
         ]
         subprocess.run(command)
     
+    #Função que vai seedar o item que foi feito o upload 
     def start_seed(self, torrent_file):
         print(torrent_file)
         save_path = self.load_download_path()  # Supondo que load_download_path retorna o diretório correto
@@ -366,7 +382,7 @@ class MainWindow(QMainWindow):
         subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print(f"Started seeding {torrent_file}")
 
-    
+    #Função responsavel por pegar todos os dados no banco de dados esses dados vão ser mostrado no nosso catalogo
     def get_all_torrents_info(self):
         tracker_url = 'http://18.191.81.105:6969/dados/torrents'
         global torrents_info
@@ -391,11 +407,13 @@ class MainWindow(QMainWindow):
         
         return b''  # Retorna uma string vazia codificada em Bencode se algo der errado
     
+    #Função que vai guardar os dados do banco de dados para assim não precisar ficar dando request sempre
     def ListaAtualizada(self):
         global torrents_info
         return torrents_info
     
 
+    #Função de abrir a pasta para escolher o item que quer ser feito o upload pode ser item unico ou diretorio
     def openFileDialog(self):
        # Criação do diálogo para seleção de arquivos
         dialog = QFileDialog()
@@ -415,19 +433,21 @@ class MainWindow(QMainWindow):
             if selected_files:
                 self.directory_edit_arquivo.setText(selected_files[0])
     
+    #Função responsavel por colocar o arquivo escolhido no campo de arquivo
     def selectFolder(self, dialog):
         folder_path = QFileDialog.getExistingDirectory(None, "Selecionar Pasta", "")
         if folder_path:
             self.directory_edit_arquivo.setText(folder_path)
             dialog.reject()  # Fecha o diálogo de arquivo
 
-
+    #Função para escolher o diretorio onde vai ser feito os download essa opção fica nas configs
     def OpenFileA(self):
         folder = QFileDialog.getExistingDirectory(self, 'Selecionar Pasta', str(Path.home()))
         if folder:
             downloads_path = Path(folder)
             self.line_download.setText(str(downloads_path))
 
+    #Função que vai mostrar todos dados fica no tipo
     def populate_layout(self, items):
 
         sorted_items = sorted(items, key=lambda x: x[0])
@@ -451,6 +471,7 @@ class MainWindow(QMainWindow):
 
             self.content_layout1.addWidget(button1, row // 2, row % 2)
 
+    #função usada para mostrar os dados no home page e tambem quando voce seleciona um tipo de midia
     def home_layout(self, items):
 
         sorted_items = sorted(items, key=lambda x: x['nome'])  
@@ -485,7 +506,7 @@ class MainWindow(QMainWindow):
             layout.addWidget(button1)  
             self.content_layout1.addLayout(layout, idx // 2, idx % 2)
         
-
+    #Função para usar o buscar ele filtra mostrando apenas os dados que voce quer
     def filtrar_conteudo(self):
         texto_busca = unidecode(self.line_edit_busca.text().lower())
         for i in reversed(range(self.content_layout1.count())):
@@ -498,6 +519,7 @@ class MainWindow(QMainWindow):
         
         self.populate_layout(filtered_items)
 
+     #Função para usar o buscar ele filtra mostrando apenas os dados que voce quer
     def filtrar_conteudo1(self):
         texto_busca = unidecode(self.line_edit_busca.text().lower())
 
@@ -526,20 +548,21 @@ class MainWindow(QMainWindow):
 
         self.home_layout(filtered_items)
 
-    
+    #Função que vai retornar a descrição do item que voce selecionou é usada quando clicamos num item
     def descricaoSearch(self, name,tipo):
         data_list = self.ListaAtualizada()
         for item in data_list:
             if item['nome'] == name and item['tipo_midia'] == tipo:
                 return item['descricao']
     
+    #Função que vai retornar a link magnetico do item que voce selecionou é usada quando clicamos num item
     def linkSearch(self, name, tipo):
         data_list = self.ListaAtualizada()
         for item in data_list:
             if item['nome'] == name and item['tipo_midia'] == tipo:
                 return item['link_magnetico']
         
-    
+    #usada para pegar o diretorio que selecionamos para download caso não for configura no config vai ser usado o /downloads
     def load_download_path(self):
         config_path = Path(CONFIG_FILE)
         if not config_path.exists():
@@ -552,6 +575,7 @@ class MainWindow(QMainWindow):
             downloads_path = Path(config.get('downloads_path', str(Path.home() / 'Downloads')))
             return downloads_path
     
+    #Salva a pasta escolhida pode ser a padrão ou a que configuramos no config
     def save_download_path(self, path):
         with open(CONFIG_FILE, 'w') as f:
             json.dump({'downloads_path': str(path)}, f) 
