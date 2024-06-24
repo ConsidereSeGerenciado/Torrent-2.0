@@ -19,13 +19,13 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout,QLabel, 
     QPushButton, QWidget,QFileDialog, QDialogButtonBox
 )
-<<<<<<< HEAD
+
 from PySide6.QtGui import QPixmap, QFont
 from PySide6.QtCore import Qt, Signal
-=======
+
 from PySide6.QtGui import QPixmap, QIcon, QFont
 from PySide6.QtCore import Qt, Signal, QTimer
->>>>>>> origin
+
 
 from Header import header
 from Menu import menu
@@ -205,11 +205,8 @@ class MainWindow(QMainWindow):
             "border: 2px solid white; padding: 0px; background-color: black"))
         self.collect_and_upload()
         self.start_progress()
-<<<<<<< HEAD
 
     #Começa o carregamento
-=======
->>>>>>> origin
     def start_progress(self):
         self.progress_value = 0
         self.progress_bar.setVisible(True)
@@ -468,10 +465,11 @@ class MainWindow(QMainWindow):
     #Função que vai mostrar todos dados fica no tipo
     def populate_layout(self, items):
 
-        sorted_items = sorted(items, key=lambda x: x[0])
+        sorted_items = sorted(items, key=lambda x: x["nome"])
         self.content_layout1.setAlignment(Qt.AlignTop)
-
-        for row, (text, image_path) in enumerate(sorted_items):    
+        for row, item in enumerate(sorted_items):
+            text = item["nome"]
+            image_path = item["imagem"] 
             button1 = ClickableImageLabel(QPixmap(image_path), 270, 90)
             button1.clicked.connect(lambda text=text: self.genero_clicked(text))
             button1.setStyleSheet("border:2px solid white; padding: 0px;")
@@ -479,6 +477,7 @@ class MainWindow(QMainWindow):
             label = QLabel(text)
             label.setFont(QFont("Abril FatFace", 20, QFont.Bold))
             label.setAlignment(Qt.AlignCenter)
+
             label.setStyleSheet("border: none; padding: 0px; background-color: transparent")
             
             layout = QVBoxLayout()
@@ -527,16 +526,22 @@ class MainWindow(QMainWindow):
     #Função para usar o buscar ele filtra mostrando apenas os dados que voce quer
     def filtrar_conteudo(self):
         texto_busca = unidecode(self.line_edit_busca.text().lower())
-        for i in reversed(range(self.content_layout1.count())):
-            self.content_layout1.itemAt(i).widget().setParent(None)
 
-        if texto_busca == "":
-            filtered_items = self.items
-        else:
-            filtered_items = [item for item in self.data_list if texto_busca.lower() in item['nome'].lower()]
-        
+        while self.content_layout1.count():
+            child = self.content_layout1.takeAt(0)
+            if child.layout():
+                while child.layout().count():
+                    grandchild = child.layout().takeAt(0)
+                    if grandchild.widget():
+                        grandchild.widget().deleteLater()
+                child.layout().deleteLater()
+            elif child.widget():
+                child.widget().deleteLater()
+
+
+        filtered_items = [item for item in self.items if texto_busca.lower() in item['nome'].lower()]
         self.populate_layout(filtered_items)
-
+        
      #Função para usar o buscar ele filtra mostrando apenas os dados que voce quer
     def filtrar_conteudo1(self):
         texto_busca = unidecode(self.line_edit_busca.text().lower())

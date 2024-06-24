@@ -73,16 +73,16 @@ def initUI1(self):
     self.content_layout1.setVerticalSpacing(20)
       
     self.items = [
-            ("Jogos", "Imagens/Capas/jogos.jpg"),
-            ("Filmes", "Imagens/Capas/filmes.jpg"),
-            ("Series", "Imagens/Capas/series.jpg"),
-            ("Desenhos", "Imagens/Capas/desenhos.jpg"),
-            ("Animes", "Imagens/Capas/animes.jpg"),
-            ("Mangas", "Imagens/Capas/mangas.png"),
-            ("Musicas", "Imagens/Capas/musica.jpg"),
-            ("Livros", "Imagens/Capas/livros.png"),
-            ("Software", "Imagens/Capas/software.jpeg")
-        ]
+    {"nome": "Jogos", "imagem": "Imagens/Capas/jogos.jpg"},
+    {"nome": "Filmes", "imagem": "Imagens/Capas/filmes.jpg"},
+    {"nome": "Series", "imagem": "Imagens/Capas/series.jpg"},
+    {"nome": "Desenhos", "imagem": "Imagens/Capas/desenhos.jpg"},
+    {"nome": "Animes", "imagem": "Imagens/Capas/animes.jpg"},
+    {"nome": "Mangas", "imagem": "Imagens/Capas/mangas.png"},
+    {"nome": "Musicas", "imagem": "Imagens/Capas/musica.jpg"},
+    {"nome": "Livros", "imagem": "Imagens/Capas/livros.png"},
+    {"nome": "Software", "imagem": "Imagens/Capas/software.jpeg"}
+    ]
     
     self.populate_layout(self.items)
     self.content_layout1.setAlignment(Qt.AlignCenter)
